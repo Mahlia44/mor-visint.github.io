@@ -1,21 +1,17 @@
 <!DOCTYPE html>
 <html>
 <head>
-
-<!--TODO: THE METADATA OF THE WEBSITE CAN BE EDITED USING THE META TAGS BELOW -->
+  <!--TODO: THE METADATA OF THE WEBSITE CAN BE EDITED USING THE META TAGS BELOW -->
   <meta charset="utf-8">
   <meta name="description"
-        content="Template project website. Replace this line with a one-sentence summary of your project.">
-  <meta name="keywords" content="project website, template, research">
+        content="Mixture-of-Recursions for Vision: adapting per-token adaptive recursion depth to image and multimodal generation on CLEVR.">
+  <meta name="keywords" content="Mixture-of-Recursions, MoR, adaptive computation, multimodal generation, CLEVR, vision transformers, EPFL CS-503">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Project Title</title>
-<!------------------------------------------------------------------------->
-
-
+  <title>Mixture-of-Recursions for Vision</title>
+  <!------------------------------------------------------------------------->
 
   <link href="https://fonts.googleapis.com/css?family=Google+Sans|Noto+Sans|Castoro"
         rel="stylesheet">
-
   <link rel="stylesheet" href="./static/css/bulma.min.css">
   <link rel="stylesheet" href="./static/css/bulma-carousel.min.css">
   <link rel="stylesheet" href="./static/css/bulma-slider.min.css">
@@ -30,6 +26,7 @@
   <script src="./static/js/bulma-carousel.min.js"></script>
   <script src="./static/js/bulma-slider.min.js"></script>
   <script src="./static/js/index.js"></script>
+
   <script>
     window.MathJax = {
       tex: {
@@ -40,88 +37,83 @@
   </script>
   <script defer src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
 </head>
+
 <body>
 
 <!--TODO: THE HEADLINE OF THE WEBPAGE: TITLE AND AUTHORS -->
-
 <section class="hero">
   <div class="hero-body">
     <div class="container is-max-desktop">
       <div class="columns is-centered">
         <div class="column has-text-centered">
-          <h1 class="title is-1 publication-title">Project Title</h1>
+          <h1 class="title is-1 publication-title">Mixture-of-Recursions for Vision</h1>
+          <h2 class="subtitle is-4 publication-title">
+            Adaptive Token-Level Computation in Image and Multimodal Generation
+          </h2>
           <div class="is-size-5 publication-authors">
             <span class="author-block">
-              <a href="https://people.epfl.ch/">John Doe</a>,
+              <a href="https://people.epfl.ch/">Gianfranco Basile</a><sup>1</sup>,
             </span>
             <span class="author-block">
-              <a href="https://people.epfl.ch/">Alice Smith</a>,
+              <a href="https://people.epfl.ch/">Hugues Sibille</a><sup>1</sup>,
             </span>
             <span class="author-block">
-              <a href="https://people.epfl.ch/">Bob Johnson</a>,
+              <a href="https://people.epfl.ch/">Mahlia Merville-Hipeau</a><sup>1</sup>,
             </span>
             <span class="author-block">
-              <a href="https://people.epfl.ch/">Jane Doe</a>
+              <a href="https://people.epfl.ch/">Romane Vorwald</a><sup>1</sup>
             </span>
           </div>
 
-<!------------------------------------------------------------------------->
+          <div class="is-size-6 publication-authors" style="margin-top: 0.5em;">
+            <span class="author-block"><sup>1</sup>EPFL &mdash; CS-503 Visual Intelligence, Spring 2026</span>
+          </div>
 
-<!--TODO: THE LINKS RELATED TO THE PROJECT -->
+          <!------------------------------------------------------------------------->
+          <!--TODO: THE LINKS RELATED TO THE PROJECT -->
           <div class="column has-text-centered">
             <div class="publication-links">
               <!-- PDF Link. -->
               <span class="link-block">
-                <a href="https://arxiv.org"
-                   class="external-link button is-normal is-rounded is-dark">
+                <a href="#"
+                  class="external-link button is-normal is-rounded is-dark">
                   <span class="icon">
-                      <i class="fas fa-file-pdf"></i>
+                    <i class="fas fa-file-pdf"></i>
                   </span>
-                  <span>Document</span>
+                  <span>Report</span>
                 </a>
               </span>
-              <!-- YouTube Link. -->
+              <!-- GitHub Code Link. -->
               <span class="link-block">
-                <a href="https://www.youtube.com"
-                   class="external-link button is-normal is-rounded is-dark">
+                <a href="#"
+                  class="external-link button is-normal is-rounded is-dark">
                   <span class="icon">
-                      <i class="fab fa-youtube"></i>
-                  </span>
-                  <span>Video</span>
-                </a>
-              </span>
-              <!-- GitHub Link. -->
-              <span class="link-block">
-                <a href="https://github.com/tarhanefe/cs503-project-template"
-                   class="external-link button is-normal is-rounded is-dark">
-                  <span class="icon">
-                      <i class="fab fa-github"></i>
+                    <i class="fab fa-github"></i>
                   </span>
                   <span>Project Code</span>
-                  </a>
+                </a>
               </span>
               <!-- Dataset Link. -->
-                <span class="link-block">
-                  <a href="https://drive.google.com/drive/folders/13W_453e-h2TWAfAnp6Ga00TYwEzTnMtg?usp=sharing"
-                    class="external-link button is-normal is-rounded is-dark">
-                    <span class="icon">
-                      <i class="fab fa-google-drive"></i>
-                    </span>
-                    <span>Dataset/Drive</span>
-                  </a>
-                </span>
-              <!-- GitHub Website Link. -->
               <span class="link-block">
-                <a href="https://github.com/tarhanefe/cs503-project-template"
-                   class="external-link button is-normal is-rounded is-dark">
+                <a href="https://cs.stanford.edu/people/jcjohns/clevr/"
+                  class="external-link button is-normal is-rounded is-dark">
                   <span class="icon">
-                      <i class="fab fa-github"></i>
+                    <i class="fas fa-database"></i>
                   </span>
-                  <span>Website Code</span>
-                  </a>
+                  <span>CLEVR Dataset</span>
+                </a>
+              </span>
+              <!-- MoR Reference Link. -->
+              <span class="link-block">
+                <a href="https://arxiv.org/abs/2507.10524"
+                  class="external-link button is-normal is-rounded is-dark">
+                  <span class="icon">
+                    <i class="ai ai-arxiv"></i>
+                  </span>
+                  <span>Original MoR Paper</span>
+                </a>
               </span>
             </div>
-
           </div>
         </div>
       </div>
@@ -130,27 +122,25 @@
 </section>
 <!------------------------------------------------------------------------->
 
-<!--TODO: THE LINKS RELATED TO THE PROJECT -->
-
+<!--TODO: TEASER -->
 <section class="hero teaser">
   <div class="container is-max-desktop">
     <div class="hero-body">
       <!-- TODO: Replace with your teaser image, gif or video file. Choose something that represents your project. -->
-      <video id="teaser" autoplay muted loop playsinline height="100%">
-        <source src="./static/videos/teaser.mp4"
-                type="video/mp4">
-      </video>
-      <h2 class="subtitle has-text-centered">
-        <span class="dnerf">Project Name</span> one-sentence teaser about what your project does.
+      <img src="./static/images/teaser_placeholder.png"
+           alt="Teaser: per-token recursion depth overlaid on a CLEVR scene."
+           style="width: 100%; max-width: 900px; display: block; margin: 0 auto;">
+      <h2 class="subtitle has-text-centered" style="margin-top: 1rem;">
+        We adapt <span class="dnerf">Mixture-of-Recursions</span> to vision: a single shared
+        transformer block applied a variable number of times per token, learning <em>where</em>
+        to spend compute on an image &mdash; and across modalities.
       </h2>
     </div>
   </div>
 </section>
-
 <!------------------------------------------------------------------------->
 
 <!--TODO: ABSTRACT OF THE PROJECT -->
-
 <section class="section">
   <div class="container is-max-desktop">
     <!-- Abstract. -->
@@ -159,397 +149,670 @@
         <h2 class="title is-3">Abstract</h2>
         <div class="content has-text-justified">
           <p>
-            <!-- TODO: Replace this abstract with your own project summary (3-5 sentences). -->
-            [Problem] Briefly describe the problem your project tackles and why it matters.
+            Standard transformer architectures apply uniform computation to every token, regardless of
+            its semantic complexity. A patch of empty sky is processed by the same number of layers as
+            a patch covering an object boundary &mdash; and this asymmetry only grows when several
+            modalities (RGB, depth, normals, text) share a single sequence. Mixture-of-Recursions
+            (MoR) addresses this in language models by reusing a shared block multiple times and
+            learning a per-token routing policy that decides <em>how many times</em> each token is
+            re-processed. Its extension to vision remains largely unexplored.
           </p>
           <p>
-            [Approach] Explain your main idea, model, or system in one to two sentences.
+            We adapt MoR to autoregressive image and multimodal generation on CLEVR, building on a
+            SmolLM-135M LLaMA backbone with Middle-Cycle parameter sharing, $N_r{=}3$ recursion
+            steps, and a unified ~242K-token vocabulary covering RGB, depth, normals, and captions.
+            We compare expert-choice and token-choice routers against random-routing and full-depth
+            baselines, and we visualise the learned routing decisions directly on the generated
+            images.
           </p>
           <p>
-            [Results] Summarize key outcomes, such as quantitative improvements, qualitative
-            observations, and main conclusions.
+            On the unimodal RGB setting, the token-choice MoR runs at roughly 26% fewer training
+            FLOPs than a same-architecture vanilla baseline while producing qualitatively cleaner
+            reconstructions. The learned router does <em>not</em> follow our initial hypothesis: it
+            spends deep recursion on a sparse set of register-like tokens, allocates depth-2 to the
+            predictable background, and uses depth-1 around object boundaries &mdash; an inverted but
+            interpretable compute allocation. The multimodal extension and cross-modal routing
+            analysis are ongoing.
           </p>
         </div>
       </div>
     </div>
     <!--/ Abstract. -->
-<!------------------------------------------------------------------------->
-<!--TODO: LIST OF ITEMS IN THE WEBSITE -->
 
-<div class="columns is-centered has-text-centered">
-        <div class="column is-full-width">
-
-          <h2 class="title is-3">Overview</h2>
-          <div class="tile is-ancestor is-centered" style="vertical-align: middle;">
-            <div class="tile is-parent">
-              <a href="#intro" class="tile is-child box">
-                <p class="subtitle">
-                  <font size="-1">Introduction</font>
-                </p>
-              </a>
-            </div>
-
-            <div class="tile is-parent">
-              <a href="#related-work" class="tile is-child box">
-                <p class="subtitle">
-                  <font size="-1">Related Works</font>
-                </p>
-              </a>
-            </div>
-
-            <div class="tile is-parent">
-              <a href="#method" class="tile is-child box">
-                <p class="subtitle">
-                  <font size="-1">Methodology</font>
-                </p>
-              </a>
-            </div>
-
-            <div class="tile is-parent">
-              <a href="#results" class="tile is-child box">
-                <p class="subtitle">
-                  <font size="-1">Results</font>
-                </p>
-              </a>
-            </div>
-
-            <div class="tile is-parent">
-              <a href="#conclusion" class="tile is-child box">
-                <p class="subtitle">
-                  <font size="-1">Conclusion and Limitations</font>
-                </p>
-              </a>
-            </div>
-<!--- TODO: Remove this part, this is here to show you possible visualizations used in the website ---------------->
-
-            <div class="tile is-parent">
-              <a href="#visual_items" class="tile is-child box">
-                <p class="subtitle">
-                  <font size="-1">Visual Items</font>
-                </p>
-              </a>
-            </div>
+    <!------------------------------------------------------------------------->
+    <!--TODO: LIST OF ITEMS IN THE WEBSITE -->
+    <div class="columns is-centered has-text-centered">
+      <div class="column is-full-width">
+        <h2 class="title is-3">Overview</h2>
+        <div class="tile is-ancestor is-centered" style="vertical-align: middle;">
+          <div class="tile is-parent">
+            <a href="#intro" class="tile is-child box">
+              <p class="subtitle">
+                <font size="-1">Introduction</font>
+              </p>
+            </a>
           </div>
-
+          <div class="tile is-parent">
+            <a href="#related-work" class="tile is-child box">
+              <p class="subtitle">
+                <font size="-1">Related Works</font>
+              </p>
+            </a>
+          </div>
+          <div class="tile is-parent">
+            <a href="#method" class="tile is-child box">
+              <p class="subtitle">
+                <font size="-1">Methodology</font>
+              </p>
+            </a>
+          </div>
+          <div class="tile is-parent">
+            <a href="#results" class="tile is-child box">
+              <p class="subtitle">
+                <font size="-1">Results</font>
+              </p>
+            </a>
+          </div>
+          <div class="tile is-parent">
+            <a href="#conclusion" class="tile is-child box">
+              <p class="subtitle">
+                <font size="-1">Conclusion &amp; Limitations</font>
+              </p>
+            </a>
+          </div>
         </div>
       </div>
-<!------------------------------------------------------------------------->
+    </div>
+    <!------------------------------------------------------------------------->
+
   </div>
 </section>
 
+
 <!-----------------------------TODO: INTRODUCTION-------------------------------->
-  <section class="section">
-    <div class="container is-max-desktop">
-      <!-- Introduction. -->
-      <div class="columns is-centered">
-        <div class="column is-full-width">
-          <h2 class="title is-3" id="intro">I. Introduction</h2>
-          <div class="content has-text-justified">
-            <p>
-              The introduction part of the report can be provided here
-            </p>
-          </div>
+<section class="section">
+  <div class="container is-max-desktop">
+    <!-- Introduction. -->
+    <div class="columns is-centered">
+      <div class="column is-full-width">
+        <h2 class="title is-3" id="intro">I. Introduction</h2>
+        <div class="content has-text-justified">
+          <h3 class="title is-4">The problem</h3>
+          <p>
+            Modern multimodal vision models &mdash; from masked encoders like
+            <strong>4M</strong> and <strong>TerraMind</strong> to decoder-only generators like
+            <strong>MaskGIT</strong> &mdash; process every spatial token through the same number of
+            transformer layers. A patch of sky receives the same compute budget as a patch covering
+            an object boundary. The asymmetry is sharper when several modalities are concatenated in
+            a single sequence: a flat-grey region of a depth map and a complex caption token are not
+            equally hard to predict, yet they consume identical compute.
+          </p>
+          <p>
+            <strong>Mixture-of-Recursions (MoR)</strong> recently addressed this in language by
+            learning <em>per-token recursion depth</em>: a single shared transformer block is applied
+            a variable number of times depending on a small router's decision. In language, this
+            yields a Pareto improvement over vanilla transformers across 135M&ndash;1.7B parameter
+            scales. To the best of our knowledge, the technique has not been studied for vision or
+            multimodal generation. The original authors explicitly list this as an open direction.
+          </p>
+
+          <h3 class="title is-4">Research questions</h3>
+          <p>We organise our work around three questions:</p>
+          <ul>
+            <li>
+              <strong>RQ1.</strong> Does the router learn to assign deeper recursion to semantically
+              complex visual tokens, and shallower recursion to simpler ones?
+            </li>
+            <li>
+              <strong>RQ2.</strong> Does the model allocate computation differently across
+              modalities? Do tokens from different modalities specialise at different recursion
+              depths?
+            </li>
+            <li>
+              <strong>RQ3.</strong> Can adaptive recursion match or improve generation quality
+              relative to a fixed-depth baseline while reducing compute?
+            </li>
+          </ul>
+
+          <h3 class="title is-4">Why it matters</h3>
+          <p>
+            <strong>Efficiency.</strong> In language, MoR reaches lower validation loss with roughly
+            half the parameters of a vanilla transformer at equal training compute. Vision token
+            sequences are long &mdash; 256 tokens per modality in our setting &mdash; so even modest
+            per-token savings compound quickly.
+          </p>
+          <p>
+            <strong>Interpretability.</strong> Routing decisions are a direct, faithful window into
+            the model's compute budget. Overlaying recursion depth on generated images gives an
+            interpretability signal that is unavailable in standard architectures and mirrors the
+            selective allocation observed in biological vision.
+          </p>
+          <p>
+            <strong>Generalisation of the technique.</strong> Demonstrating that MoR transfers from
+            language to vision (or characterising precisely how and where it fails to) is a
+            contribution in itself, independent of the absolute benchmark numbers we obtain.
+          </p>
         </div>
       </div>
-      <!--/ Introduction. -->
     </div>
-  </section>
+    <!--/ Introduction. -->
+  </div>
+</section>
 <!------------------------------------------------------------------------->
 
 <!-----------------------------TODO: RELATED WORKS-------------------------------->
-  <section class="section">
-    <div class="container is-max-desktop">
-      <!-- Related Works. -->
-      <div class="columns is-centered">
-        <div class="column is-full-width">
-          <h2 class="title is-3" id="related-work">II. Related Works</h2>
-          <div class="content has-text-justified">
-            <p>
-              The related works part of the report can be provided here
-            </p>
-          </div>
+<section class="section">
+  <div class="container is-max-desktop">
+    <!-- Related Works. -->
+    <div class="columns is-centered">
+      <div class="column is-full-width">
+        <h2 class="title is-3" id="related-work">II. Related Works</h2>
+        <div class="content has-text-justified">
+          <h3 class="title is-4">Adaptive computation in transformers</h3>
+          <p>
+            The <strong>Universal Transformer</strong> introduced recursive parameter sharing with
+            per-position adaptive halting, establishing the idea that different positions may
+            benefit from different effective depths. <strong>Mixture-of-Depths (MoD)</strong> later
+            proposed top-$k$ routing to skip tokens at individual transformer layers, matching
+            baseline quality with up to 50% fewer FLOPs &mdash; but without parameter sharing across
+            layers, so model size grows with depth.
+          </p>
+          <p>
+            <strong>Mixture-of-Recursions (MoR)</strong> unifies these two ideas: a single shared
+            block is applied recursively, and a lightweight router decides per token how many
+            recursion steps to take. This combines MoD's per-token compute allocation with the
+            Universal Transformer's parameter sharing, and establishes a new Pareto frontier across
+            135M&ndash;1.7B parameter scales. All MoR experiments are conducted on language only.
+          </p>
+
+          <h3 class="title is-4">Adaptive computation in vision</h3>
+          <p>
+            <strong>A-ViT</strong> applies per-token adaptive halting to patch embeddings, but the
+            study is restricted to unimodal classification and does not involve parameter-shared
+            recursion. <strong>$\gamma$-MoD</strong> extends token skipping to multimodal LLMs but
+            relies on unique layers (no parameter sharing) and does not study cross-modal routing
+            patterns. To our knowledge, no prior work combines MoR's recursive adaptive-depth
+            framework with discrete multimodal vision tokens or analyses cross-modal routing
+            interpretability.
+          </p>
+
+          <h3 class="title is-4">Multimodal generative backbones</h3>
+          <p>
+            Our backbone choice is informed by recent any-to-any multimodal generators &mdash;
+            <strong>4M</strong>, <strong>4M-21</strong>, <strong>TerraMind</strong> &mdash; which
+            tokenise heterogeneous modalities into a unified discrete vocabulary and train a single
+            transformer to predict across them. We adopt the same recipe (discrete tokens, single
+            sequence) but replace the fixed-depth decoder with a recursive one, allowing the model
+            to spend variable compute per token and per modality.
+          </p>
+
+          <h3 class="title is-4">Where we sit</h3>
+          <p>
+            Our project is the intersection of these three lines: MoR's recursive shared block,
+            adaptive computation specifically for vision tokens, and multimodal autoregressive
+            generation. We are not aware of prior work that brings the three together, and we treat
+            cross-modal router behaviour as the main interpretability question.
+          </p>
         </div>
       </div>
-      <!--/ Related Works. -->
     </div>
-  </section>
+    <!--/ Related Works. -->
+  </div>
+</section>
 <!------------------------------------------------------------------------->
 
 <!-----------------------------TODO: METHODOLOGY-------------------------------->
-  <section class="section">
-    <div class="container is-max-desktop">
-      <!-- Methodology. -->
-      <div class="columns is-centered">
-        <div class="column is-full-width">
-          <h2 class="title is-3" id="method">III. Methodology</h2>
-          <div class="content has-text-justified">
-            <p>
-              The methodology part of the report can be provided here
-            </p>
-          </div>
-        </div>
-      </div>
-      <!--/ Methodology. -->
-    </div>
-  </section>
-
-<!------------------------------------------------------------------------->
-
-<!-----------------------------TODO: RESULTS-------------------------------->
-  <section class="section">
-    <div class="container is-max-desktop">
-      <!-- Results. -->
-      <div class="columns is-centered">
-        <div class="column is-full-width">
-          <h2 class="title is-3" id="results">IV. Results</h2>
-          <div class="content has-text-justified">
-            <p>
-              The results part of the report can be provided here
-            </p>
-          </div>
-        </div>
-      </div>
-      <!--/ Results. -->
-    </div>
-  </section>
-<!------------------------------------------------------------------------->
-
-<!-----------------------------TODO: DISCUSSION-------------------------------->
-  <section class="section">
-    <div class="container is-max-desktop">
-      <!-- Conclusion and Limitations. -->
-      <div class="columns is-centered">
-        <div class="column is-full-width">
-          <h2 class="title is-3" id="conclusion">V. Conclusion and Limitations</h2>
-          <div class="content has-text-justified">
-            <p>
-              The conclusion and limitations part of the report can be provided here
-            </p>
-          </div>
-        </div>
-      </div>
-      <!--/ Conclusion and Limitations. -->
-    </div>
-  </section>
-<!------------------------------------------------------------------------->
-
-<!-----------------------------TODO: VISUAL ITEMS THAT CAN BE USED-------------------------------->
-  <section class="section">
-    <div class="container is-max-desktop">
-      <!-- Visual Items. -->
-      <div class="columns is-centered">
-        <div class="column is-full-width">
-          <h2 class="title is-3" id="visual_items">V. Visual Items</h2>
-          <div class="content has-text-justified">
-            <p>
-            Here you can see possible visualizations that can be used in this website 
-            </p>
-          </div>
-        <h3 class="title is-4">Video Clip</h3>
-       <!-- Video can be added like this -->   
-        <div class="content has-text-centered">
-          <video id="replay-video"
-                 controls
-                 muted
-                 preload
-                 playsinline
-                 width="75%">
-            <source src="./static/videos/replay.mp4"
-                    type="video/mp4">
-          </video>
-        </div>
-       <!---------------------------------> 
-           
-      <h3 class="title is-4">Image Interpolation with Slider</h3>
-       <!-- Image can be added like this -->
-        <div class="columns is-vcentered interpolation-panel">
-          <div class="column is-3 has-text-centered">
-            <img src="./static/images/interpolate_start.jpg"
-                 class="interpolation-image"
-                 alt="Interpolate start reference image."/>
-            <p>Start Frame</p>
-          </div>
-          <div class="column interpolation-video-column">
-            <div id="interpolation-image-wrapper">
-              Loading...
-            </div>
-            <input class="slider is-fullwidth is-large is-info"
-                   id="interpolation-slider"
-                   step="1" min="0" max="100" value="0" type="range">
-          </div>
-          <div class="column is-3 has-text-centered">
-            <img src="./static/images/interpolate_end.jpg"
-                 class="interpolation-image"
-                 alt="Interpolation end reference image."/>
-            <p class="is-bold">End Frame</p>
-          </div>
-        </div>
-        
-<h3 class="title is-4">Double Column Media Display</h3>
-    <div class="columns is-centered is-multiline">
-      <!-- Column 1. -->
-      <div class="column is-half">
-        <div class="content">
-          <h3 class="title is-5">Column 1</h3>
+<section class="section">
+  <div class="container is-max-desktop">
+    <!-- Methodology. -->
+    <div class="columns is-centered">
+      <div class="column is-full-width">
+        <h2 class="title is-3" id="method">III. Methodology</h2>
+        <div class="content has-text-justified">
+          <h3 class="title is-4">Architecture overview</h3>
           <p>
-            Add a short description for the first video/image.
+            Our model is a SmolLM-135M LLaMA-based decoder-only transformer with
+            <strong>Middle-Cycle parameter sharing</strong> and $N_r{=}3$ recursion steps, fed by a
+            unified multimodal vocabulary of ~242K tokens. The vocabulary reserves disjoint codebook
+            slots for RGB, depth, normals, captions, and scene descriptions. Visual modalities are
+            discretised by the <strong>Cosmos DI-16&times;16</strong> tokenizer (256 tokens per
+            $256{\times}256$ image), and text uses the GPT-2 BPE tokenizer.
           </p>
-          <video id="dollyzoom" autoplay controls muted loop playsinline width="100%">
-            <source src="./static/videos/dollyzoom-stacked.mp4"
-                    type="video/mp4">
-          </video>
-        </div>
-      </div>
-      <!--/ Column 1 -->
 
-      <!-- Column 2 -->
-      <div class="column is-half">
-        <div class="content">
-          <h3 class="title is-5">Column 2</h3>
-          <p>
-            Add a short description for the second video/image.
-          </p>
-          <video id="matting-video" controls playsinline width="100%">
-            <source src="./static/videos/matting.mp4"
-                    type="video/mp4">
-          </video>
-        </div>
-      </div>
-      <!--/ Column 2 -->
-    </div>
-  <!--------------------------------->
-<h3 class="title is-4">Card Media Display</h3>
-      <div class="columns is-centered">
-        <div class="column is-three-quarters">
+          <!-- TODO: Replace placeholder with the actual architecture figure from the proposal/report. -->
           <div align="center" class="box">
-            <img src="static/images/related_2.gif"
-              alt="3D Bezier curves are used for representing 3D sketches of objects.">
+            <img src="./static/images/architecture_placeholder.png"
+                 alt="Architecture overview: per-modality tokenizers feed a shared recursive transformer block; per-modality routers decide whether each token continues to the next recursion depth or exits early."
+                 style="width: 100%; max-width: 800px;">
             <h5 class="subtitle has-text-centered">
               <font size="-0.7">
                 <span style="font-weight:normal">
-                  Write about the media displayed in the card here. You can also add a link to the media if needed.
+                  <strong>Figure 1.</strong> Overview of our MoR-for-Vision architecture. Each modality
+                  is tokenised by its own tokenizer and concatenated into a single sequence. A shared
+                  recursive block is applied up to $N_r{=}3$ times; lightweight routers decide
+                  per-token whether to continue to the next recursion or exit early.
                 </span>
               </font>
             </h5>
           </div>
+
+          <h3 class="title is-4">Multimodal tokenisation</h3>
+          <p>
+            All modalities are mapped to a single discrete token space so that the model can be
+            trained with vanilla next-token prediction. The token sequences from each modality are
+            concatenated with a fixed ordering at training time
+            (RGB&nbsp;$\rightarrow$&nbsp;depth&nbsp;$\rightarrow$&nbsp;normals&nbsp;$\rightarrow$&nbsp;text)
+            in the proposal; in the multimodal training phase we additionally explore
+            <em>random modality ordering</em> so that the same router can be queried with different
+            modality contexts.
+          </p>
+
+          <h3 class="title is-4">Recursive block and routing</h3>
+          <p>
+            Following the MoR formulation, a single transformer block $f_\theta$ is applied
+            recursively up to $N_r$ times. At each recursion step a small router decides, for every
+            token, whether to continue or exit. The token's final hidden state is the output of its
+            last visited recursion. We implement two routing strategies:
+          </p>
+          <ul>
+            <li>
+              <strong>Expert-choice routing.</strong> At each recursion step, each &ldquo;expert&rdquo;
+              (i.e. each recursion stage) keeps the top-$k$ tokens by router score. This was our
+              originally proposed strategy.
+            </li>
+            <li>
+              <strong>Token-choice routing.</strong> Each token independently chooses its recursion
+              depth from a discrete distribution induced by its router scores. We switched to
+              token-choice after observing that expert-choice collapsed to a positional schedule
+              (see §IV).
+            </li>
+          </ul>
+          <p>
+            The router output at recursion $r$ is mixed back into the residual stream with a
+            scalar weight $\alpha$. We found this $\alpha$ to be a critical knob for
+            stabilisation: too small and the router collapses onto a single depth; with
+            $\alpha{=}1.0$ the router is rewarded for spreading mass across depths and produces a
+            three-mode depth distribution.
+          </p>
+          <p>
+            We use <strong>recursion-wise KV caching</strong> so that tokens which exit early do not
+            pay attention cost at deeper recursions.
+          </p>
+
+          <h3 class="title is-4">Per-modality routers (vs. shared router)</h3>
+          <p>
+            Our project proposal called for one router per modality, hypothesising that modalities
+            differ in information density and therefore in optimal recursion depth. Based on the
+            milestone-I findings, we revised this plan: for the multimodal phase we currently use a
+            <em>single shared router</em> fed by random modality orderings, since independent routers
+            cannot share signal across modalities, which would undermine the cross-modal
+            interpretability we want to study (RQ2). The per-modality variant is kept as a planned
+            ablation if time allows.
+          </p>
+
+          <h3 class="title is-4">Baselines</h3>
+          <p>To isolate the contribution of learned routing we compare against:</p>
+          <ul>
+            <li>
+              <strong>Vanilla SmolLM-135M.</strong> Same architecture, no recursion, full
+              fixed-depth forward pass.
+            </li>
+            <li>
+              <strong>Random-router MoR.</strong> Same recursive block as our model but with routing
+              decisions sampled uniformly at random. This isolates the contribution of the
+              <em>learned</em> policy from the architectural change alone.
+            </li>
+            <li>
+              <strong>Full-recursion MoR (in progress).</strong> Every token always routed to depth
+              $N_r{=}3$. This is the compute upper bound against which our learned router's FLOPs
+              savings should be measured for a fully controlled answer to RQ3.
+            </li>
+          </ul>
         </div>
       </div>
-<!--------------------------------->
-<h3 class="title is-4">LaTeX Equation</h3>
-  
-Format the equations using LaTeX and add them to the website like this:
-    <p>
-        \[
-        D_{\mathrm{KL}}(P \parallel Q) =
-        \sum_{x} P(x)\,\log\!\left(\frac{P(x)}{Q(x)}\right)
-        \]
-    </p>
-<!--------------------------------->
-
-<h3 class="title is-4">Sliding Media Display</h3>
-    <section class="section">
-      <div class="container is-max-desktop">
-        <div id="dataset-carousel" class="carousel results-carousel">
-          <a href="./static/gifs/bike.gif" data-lightbox="image">
-            <img src="./static/gifs/bike.gif" alt="Bike Object">
-          </a>
-
-          <a href="./static/gifs/duck.gif" data-lightbox="image">
-            <img src="./static/gifs/duck.gif" alt="Duck Object">
-          </a>
-
-          <a href="./static/gifs/horse.gif" data-lightbox="image">
-            <img src="./static/gifs/horse.gif" alt="Horse Object">
-          </a>
-
-          <a href="./static/gifs/rose.gif" data-lightbox="image">
-            <img src="./static/gifs/rose.gif" alt="Rose Object">
-          </a>
-        </div>
-      </div>
-    </section>
-<!--------------------------------->
-<h3 class="title is-4">Table</h3>
-
-<div class="content has-text-justified">
-  <p>
-    The table format below can be used for results and other purposes.
-  </p>
-  <div class="table-container">
-    <table class="table is-bordered is-striped is-narrow is-hoverable is-fullwidth">
-      <thead>
-        <tr>
-          <th>Method</th>
-          <th>Metric 1</th>
-          <th>Metric 2</th>
-          <th>Notes</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr>
-          <td>Baseline</td>
-          <td>0.00</td>
-          <td>0.00</td>
-          <td>Reference setup</td>
-        </tr>
-        <tr>
-          <td>Method A</td>
-          <td>0.00</td>
-          <td>0.00</td>
-          <td>First variant</td>
-        </tr>
-        <tr>
-          <td>Method B</td>
-          <td>0.00</td>
-          <td>0.00</td>
-          <td>Second variant</td>
-        </tr>
-      </tbody>
-    </table>
-  </div>
-</div>
-
-<!--------------------------------->
-<h3 class="title is-4">Interactive Plot</h3>
-<div class="box">
-  <iframe src="./static/plotly/interactive_plot.html" frameborder="0" width="100%"
-    height="500px"></iframe>
-</div>
-
-<!--------------------------------->
-
-        </div>
-      </div>
-      <!--/ Visual Items. -->
     </div>
-  </section>
+    <!--/ Methodology. -->
+  </div>
+</section>
+<!------------------------------------------------------------------------->
 
+<!-----------------------------TODO: RESULTS-------------------------------->
+<section class="section">
+  <div class="container is-max-desktop">
+    <!-- Results. -->
+    <div class="columns is-centered">
+      <div class="column is-full-width">
+        <h2 class="title is-3" id="results">IV. Results</h2>
+        <div class="content has-text-justified">
+          <h3 class="title is-4">Experimental setup</h3>
+          <p>
+            All models in this section are trained on unimodal RGB CLEVR for 19,500 steps under the
+            configuration of the original MoR paper. Reported FLOPs are the total training compute,
+            and the training loss is the standard next-token prediction loss at the end of training.
+            Generations are unconditional, greedy, from a single BOS prompt.
+          </p>
+
+          <h3 class="title is-4">Unimodal proof of concept (Milestone I)</h3>
+          <p>
+            Table 1 reports parameter counts, training FLOPs, and final training loss across our
+            baselines and MoR variants. Token-choice MoR uses ~26% fewer training FLOPs than the
+            vanilla SmolLM baseline while remaining competitive with the random-router variant on
+            loss &mdash; and, crucially, producing qualitatively cleaner generations (Figure 3).
+          </p>
+
+          <div class="table-container">
+            <table class="table is-bordered is-striped is-narrow is-hoverable is-fullwidth">
+              <thead>
+                <tr>
+                  <th>Model</th>
+                  <th># Params (M)</th>
+                  <th>Training FLOPs</th>
+                  <th>Train loss ($\downarrow$)</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><strong>Vanilla</strong> (fixed depth)</td>
+                  <td>242.2</td>
+                  <td>$7.91 \times 10^{17}$</td>
+                  <td><strong>3.29</strong></td>
+                </tr>
+                <tr>
+                  <td>Random router</td>
+                  <td>178.5</td>
+                  <td>$2.79 \times 10^{17}$</td>
+                  <td>3.58</td>
+                </tr>
+                <tr>
+                  <td>Token-choice (ours)</td>
+                  <td>179.2</td>
+                  <td>$3.05 \times 10^{17}$</td>
+                  <td>3.62</td>
+                </tr>
+                <tr>
+                  <td>Expert-choice</td>
+                  <td>194.4</td>
+                  <td>$4.22 \times 10^{17}$</td>
+                  <td>3.90</td>
+                </tr>
+              </tbody>
+            </table>
+            <p style="font-size: 0.9em;">
+              <strong>Table 1.</strong> Parameters, training FLOPs and final loss at 19,500 steps
+              across baselines and MoR variants ($N_r{=}3$). The token-choice MoR uses ~26% fewer
+              training FLOPs than vanilla while remaining within 0.33 of its training loss.
+            </p>
+          </div>
+
+          <h3 class="title is-4">An inverted compute allocation (RQ1)</h3>
+          <p>
+            We initially hypothesised that the router would assign more recursion to semantically
+            complex parts of an image &mdash; object boundaries, texture transitions &mdash; and
+            less to flat regions. <strong>Our preliminary results reject this hypothesis.</strong>
+            Figure 2(a) shows the depth heatmap of the trained token-choice router overlaid on a
+            generated CLEVR scene:
+          </p>
+          <ul>
+            <li>Depth&nbsp;2 dominates the <em>background</em>;</li>
+            <li>Depth&nbsp;1 is concentrated <em>around</em> objects;</li>
+            <li>A sparse subset of 3&ndash;5 tokens per image is routed to depth&nbsp;3.</li>
+          </ul>
+
+          <!-- TODO: Replace with Fig.1 from the progress report (per-token recursion depth heatmaps). -->
+          <div class="columns is-centered">
+            <div class="column is-half">
+              <div align="center" class="box">
+                <img src="./static/images/depth_token_choice_placeholder.png"
+                     alt="Per-token recursion depth heatmap for the token-choice router on a CLEVR scene."
+                     style="width: 100%;">
+                <h5 class="subtitle has-text-centered">
+                  <font size="-0.7"><span style="font-weight:normal">
+                    <strong>(a) Token-choice.</strong> Depth-2 in the background, depth-1 around
+                    objects, a sparse subset at depth-3 (candidate &ldquo;register&rdquo; tokens).
+                  </span></font>
+                </h5>
+              </div>
+            </div>
+            <div class="column is-half">
+              <div align="center" class="box">
+                <img src="./static/images/depth_expert_choice_placeholder.png"
+                     alt="Per-token recursion depth heatmap for the expert-choice router, showing a fixed positional schedule."
+                     style="width: 100%;">
+                <h5 class="subtitle has-text-centered">
+                  <font size="-0.7"><span style="font-weight:normal">
+                    <strong>(b) Expert-choice collapse.</strong> A purely positional schedule (top
+                    tokens at depth-3, bottom at depth-1) regardless of image content.
+                  </span></font>
+                </h5>
+              </div>
+            </div>
+          </div>
+          <p style="text-align: center; font-size: 0.9em;">
+            <strong>Figure 2.</strong> Per-token recursion depth at inference, overlaid on the
+            generated image.
+          </p>
+
+          <p>Two effects plausibly explain the inverted pattern:</p>
+          <ul>
+            <li>
+              <strong>Autoregressive predictability.</strong> Given CLEVR's geometric regularity,
+              once an object's boundary is set, its interior becomes highly predictable. Background
+              tokens carry less local entropy individually, but as a group they encode lighting,
+              shadow gradients, and the lookahead for upcoming objects &mdash; which appears to
+              justify their slightly deeper recursion.
+            </li>
+            <li>
+              <strong>Register-like tokens.</strong> The sparse depth-3 set is consistent with the
+              <em>register-token</em> phenomenon recently observed in Vision Transformers, where the
+              model designates low-information positions as global scratchpads. Importantly, these
+              high-recursion tokens do not occur at the same image positions across samples: their
+              location varies per image while their count remains roughly constant &mdash; the
+              expected signature of learned, content-conditioned scratchpads rather than a fixed
+              positional artifact. A planned ablation is to mask these tokens at inference and
+              measure the impact on reconstruction quality.
+            </li>
+          </ul>
+
+          <h3 class="title is-4">Qualitative generations</h3>
+          <!-- TODO: Replace with Fig.2 from the progress report (token-choice vs random vs vanilla samples). -->
+          <div class="columns is-centered">
+            <div class="column is-one-third">
+              <div align="center" class="box">
+                <img src="./static/images/gen_token_choice_placeholder.png"
+                     alt="Unconditional CLEVR sample, token-choice MoR." style="width: 100%;">
+                <h5 class="subtitle has-text-centered">
+                  <font size="-0.7"><span style="font-weight:normal">(a) Token-choice</span></font>
+                </h5>
+              </div>
+            </div>
+            <div class="column is-one-third">
+              <div align="center" class="box">
+                <img src="./static/images/gen_random_placeholder.png"
+                     alt="Unconditional CLEVR sample, random router." style="width: 100%;">
+                <h5 class="subtitle has-text-centered">
+                  <font size="-0.7"><span style="font-weight:normal">(b) Random router</span></font>
+                </h5>
+              </div>
+            </div>
+            <div class="column is-one-third">
+              <div align="center" class="box">
+                <img src="./static/images/gen_vanilla_placeholder.png"
+                     alt="Unconditional CLEVR sample, vanilla SmolLM-135M." style="width: 100%;">
+                <h5 class="subtitle has-text-centered">
+                  <font size="-0.7"><span style="font-weight:normal">(c) Vanilla</span></font>
+                </h5>
+              </div>
+            </div>
+          </div>
+          <p style="text-align: center; font-size: 0.9em;">
+            <strong>Figure 3.</strong> Unconditional CLEVR generations under matched inference
+            settings (greedy, single BOS prompt). The token-choice MoR yields cleaner object
+            boundaries and a more coherent global layout than both the random-router and the
+            vanilla baseline.
+          </p>
+
+          <h3 class="title is-4">Why expert-choice fails</h3>
+          <p>
+            Although our proposal selected expert-choice routing, in practice it converged to a
+            <em>position-dependent</em> allocation: tokens predicted at early sequence positions
+            received depth-3, and later tokens progressively less, producing the fixed three-band
+            pattern in Figure 2(b) regardless of input image. The reason is structural: expert-choice
+            forces each recursion stage to retain a fixed top-$k$ fraction of tokens. With an
+            autoregressive sequence, the cheapest way for the router to satisfy this constraint
+            while minimising loss is to adopt a content-independent positional schedule. We
+            therefore deviated from the proposal and switched to token-choice routing.
+          </p>
+
+          <h3 class="title is-4">Stabilising the token-choice router: the role of $\alpha$</h3>
+          <p>
+            $\alpha$ is the residual-stream weight applied to deeper-recursion outputs, and
+            therefore controls the expected reward for computing at higher depths. Empirically:
+          </p>
+          <ul>
+            <li>
+              <strong>Small $\alpha$:</strong> the router collapses to predominantly depth-2,
+              producing a near-fixed schedule.
+            </li>
+            <li>
+              <strong>$\alpha{=}1.0$:</strong> the router is rewarded for differentiating tokens,
+              producing the three-mode distribution that drives the interpretability results above.
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+    <!--/ Results. -->
+  </div>
+</section>
+<!------------------------------------------------------------------------->
+
+<!-----------------------------TODO: CONCLUSION & LIMITATIONS-------------------------------->
+<section class="section">
+  <div class="container is-max-desktop">
+    <!-- Conclusion and Limitations. -->
+    <div class="columns is-centered">
+      <div class="column is-full-width">
+        <h2 class="title is-3" id="conclusion">V. Conclusion and Limitations</h2>
+        <div class="content has-text-justified">
+          <h3 class="title is-4">What we have so far</h3>
+          <p>
+            On unimodal RGB CLEVR, MoR transfers from language to vision: the token-choice router
+            learns a structured, content-dependent depth policy and produces qualitatively cleaner
+            generations than both a vanilla fixed-depth baseline and a random-routing ablation,
+            while using roughly 26% fewer training FLOPs than the vanilla baseline. The learned
+            allocation is the <em>opposite</em> of our initial hypothesis &mdash; depth concentrates
+            in the background and on a sparse set of register-like positions, not on object
+            boundaries &mdash; which is itself an interpretable finding.
+          </p>
+
+          <h3 class="title is-4">Limitations</h3>
+          <ul>
+            <li>
+              <strong>Scale and domain.</strong> Our results are at the 135M-base scale on CLEVR, a
+              procedurally generated dataset with strong geometric regularity. A first run on
+              natural images (COCO) was not conclusive: the data pipeline runs, but the model needs
+              adaptation before it produces meaningful samples. We have deferred this until the
+              multimodal CLEVR analysis is complete.
+            </li>
+            <li>
+              <strong>Missing baseline.</strong> The fairest answer to RQ3 requires a full-recursion
+              MoR baseline (every token at depth 3) to isolate the compute saving from the
+              architectural effect. This is the next baseline to train.
+            </li>
+            <li>
+              <strong>Expert-choice is currently a failure case.</strong> We characterised <em>why</em>
+              it collapses, but a routing strategy that combines expert-choice's load-balancing with
+              content-dependence would be valuable future work.
+            </li>
+          </ul>
+
+          <h3 class="title is-4">Next steps (Milestone II and beyond)</h3>
+          <ul>
+            <li>
+              <strong>Full-recursion baseline (RQ3).</strong> Train $N_r{=}3$ MoR with every token
+              routed to depth-3 as the compute upper bound.
+            </li>
+            <li>
+              <strong>Cross-modal router analysis (RQ2).</strong> Train on RGB, depth, normals, and
+              captions with random modality ordering and a single shared router; measure per-modality
+              entropy and reconstruction quality (FID, SSIM); compare against a per-modality-router
+              ablation.
+            </li>
+            <li>
+              <strong>Cross-modal generation.</strong> Condition on a subset of input modalities and
+              autoregressively generate the rest (e.g. caption&nbsp;$\rightarrow$&nbsp;RGB,
+              RGB&nbsp;$\rightarrow$&nbsp;depth+normals), assessing semantic coherence and the
+              influence of modality ordering at inference.
+            </li>
+            <li>
+              <strong>Register-token ablation.</strong> Mask the sparse depth-3 tokens at inference
+              and measure the impact on global reconstruction quality, to validate the register-token
+              interpretation.
+            </li>
+            <li>
+              <strong>COCO (stretch goal).</strong> Revisit natural-image data once the multimodal
+              CLEVR analysis is complete.
+            </li>
+          </ul>
+
+          <h3 class="title is-4">Future extensions</h3>
+          <p>
+            Beyond the planned milestones, we see two directions: (i) studying scaling behaviour
+            &mdash; whether the inverted depth allocation persists at larger $N_r$ and on
+            higher-resolution images; and (ii) combining MoR routing with classifier-free guidance
+            or modality dropout, to test whether adaptive depth interacts non-trivially with other
+            forms of conditional compute.
+          </p>
+        </div>
+      </div>
+    </div>
+    <!--/ Conclusion and Limitations. -->
+  </div>
+</section>
 <!------------------------------------------------------------------------->
 
 <footer class="footer">
-            <div class="container">
-              <div class="content has-text-centered">
-                <!-- Optional icon link (e.g., to GitHub repo) -->
-              </div>
-
-              <div class="columns is-centered">
-                <div class="column is-8">
-                  <div class="content">
-                    <h6 class="title is-6">Individual Contributions</h6>
-                    <p>
-                      Add the contributions of each team member here.
-                    </p>
-                    <p><em>
-                        This website is based on the <a href="https://github.com/nerfies/nerfies.github.io"
-                          target="_blank">Nerfies website template</a>,
-                        which is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-sa/4.0/"
-                          target="_blank">Creative Commons Attribution-ShareAlike 4.0 International License</a>.
-                      </em></p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </footer>
+  <div class="container">
+    <div class="content has-text-centered">
+      <!-- Optional icon link (e.g., to GitHub repo) -->
+    </div>
+    <div class="columns is-centered">
+      <div class="column is-8">
+        <div class="content">
+          <h6 class="title is-6">Individual Contributions</h6>
+          <p>
+            <strong>Gianfranco Basile</strong> designed the final architectural adaptation of MoR to
+            the visual domain and built the routing infrastructure for the multimodal phase
+            (including dataloaders).
+          </p>
+          <p>
+            <strong>Hugues Sibille</strong> refactored the training framework from the original MoR
+            codebase and built the vision inference pipeline: decoded-image overlays, recursion
+            heatmaps, and FLOPs accounting.
+          </p>
+          <p>
+            <strong>Mahlia Merville-Hipeau</strong> developed the first prototype of MoR adapted to
+            the visual domain and prepared the CLEVR and COCO data pipelines.
+          </p>
+          <p>
+            <strong>Romane Vorwald</strong> identified the changes required to train the
+            random-router and vanilla fixed-depth baselines.
+          </p>
+          <p>
+            All authors contributed to running experiments, evaluating performance, and writing the
+            reports and this webpage.
+          </p>
+          <p><em>
+            This website is based on the <a href="https://github.com/nerfies/nerfies.github.io"
+              target="_blank">Nerfies website template</a>,
+            which is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-sa/4.0/"
+              target="_blank">Creative Commons Attribution-ShareAlike 4.0 International License</a>.
+          </em></p>
+        </div>
+      </div>
+    </div>
+  </div>
+</footer>
 
 </body>
 </html>
