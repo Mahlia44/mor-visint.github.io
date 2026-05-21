@@ -128,22 +128,22 @@
     <div class="hero-body">
       <div class="columns is-centered is-vcentered" id="teaser-gifs">
         <div class="column has-text-centered">
-          <img id="gif-rgb" src="./static/images/recursion_sample01_tok_rgb_at_256.gif"
+          <img id="gif-rgb" src="./static/gifs/teaser/recursion_sample01_tok_rgb_at_256.gif"
                alt="RGB autoregressive generation" style="width: 100%;">
           <p style="margin-top: 0.4rem; font-weight: 600;">RGB</p>
         </div>
         <div class="column has-text-centered">
-          <img id="gif-depth" src="./static/images/recursion_sample01_tok_depth_at_256.gif"
+          <img id="gif-depth" src="./static/gifs/teaser/recursion_sample01_tok_depth_at_256.gif"
                alt="Depth autoregressive generation" style="width: 100%;">
           <p style="margin-top: 0.4rem; font-weight: 600;">Depth</p>
         </div>
         <div class="column has-text-centered">
-          <img id="gif-normals" src="./static/images/recursion_sample01_tok_normal_at_256.gif"
+          <img id="gif-normals" src="./static/gifs/teaser/recursion_sample01_tok_normal_at_256.gif"
                alt="Normals autoregressive generation" style="width: 100%;">
           <p style="margin-top: 0.4rem; font-weight: 600;">Normals</p>
         </div>
         <div class="column has-text-centered">
-          <img id="gif-caption" src="./static/images/recursion_sample01_caption.gif"
+          <img id="gif-caption" src="./static/gifs/teaser/recursion_sample01_caption.gif"
                alt="Caption autoregressive generation" style="width: 100%;">
           <p style="margin-top: 0.4rem; font-weight: 600;">Caption</p>
         </div>
@@ -714,6 +714,104 @@
               producing the three-mode distribution that drives the interpretability results above.
             </li>
           </ul>
+
+          <h3 class="title is-4">Modality-to-modality generation</h3>
+          <p>
+            Given one input modality, the model autoregressively generates a target modality.
+            Select an input and an output below to visualise the generated result.
+          </p>
+
+          <div class="columns is-centered is-vcentered" style="margin: 1.5rem 0; gap: 0.5rem;">
+            <div class="column is-narrow has-text-centered">
+              <p style="margin-bottom: 0.4rem; font-weight: 600;">Input</p>
+              <div class="select is-medium">
+                <select id="cm-input">
+                  <option value="rgb">RGB</option>
+                  <option value="depth">Depth</option>
+                  <option value="normal">Normal</option>
+                  <option value="caption">Caption</option>
+                </select>
+              </div>
+            </div>
+            <div class="column is-narrow has-text-centered" style="font-size: 1.8rem; padding-top: 1.6rem;">
+              &rarr;
+            </div>
+            <div class="column is-narrow has-text-centered">
+              <p style="margin-bottom: 0.4rem; font-weight: 600;">Output</p>
+              <div class="select is-medium">
+                <select id="cm-output">
+                  <option value="rgb">RGB</option>
+                  <option value="depth">Depth</option>
+                  <option value="normal">Normal</option>
+                  <option value="caption">Caption</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <div id="cm-display" style="margin-top: 1rem;">
+            <p id="cm-same-msg" style="display:none; color: #888; font-style: italic; margin-top: 2rem; text-align:center;">
+              Please select different input and output modalities.
+            </p>
+            <div id="cm-img-wrap" class="columns is-centered is-vcentered" style="display:none;">
+              <div class="column is-one-third has-text-centered">
+                <img id="cm-input-img" src="" alt="Input"
+                     style="width: 100%; border-radius: 6px;"
+                     onerror="this.style.opacity='0.15';">
+                <p style="margin-top: 0.5rem; font-weight: 600;" id="cm-input-label"></p>
+              </div>
+              <div class="column is-one-third has-text-centered">
+                <img id="cm-gen-img" src="" alt="Generated"
+                     style="width: 100%; border-radius: 6px;"
+                     onerror="this.style.opacity='0.15';">
+                <p style="margin-top: 0.5rem; font-weight: 600;">Generated</p>
+              </div>
+              <div class="column is-one-third has-text-centered">
+                <img id="cm-gt-img" src="" alt="Ground truth"
+                     style="width: 100%; border-radius: 6px;"
+                     onerror="this.style.opacity='0.15';">
+                <p style="margin-top: 0.5rem; font-weight: 600; color: #48c774;">Ground Truth</p>
+              </div>
+            </div>
+          </div>
+
+          <script>
+            (function () {
+              var LABELS = { rgb: 'RGB', depth: 'Depth', normals: 'Normals', caption: 'Caption' };
+              var BASE = './static/gifs/cross_modal/';
+
+              function update() {
+                var inp = document.getElementById('cm-input').value;
+                var out = document.getElementById('cm-output').value;
+                var sameMsg  = document.getElementById('cm-same-msg');
+                var imgWrap  = document.getElementById('cm-img-wrap');
+
+                if (inp === out) {
+                  sameMsg.style.display = 'block';
+                  imgWrap.style.display = 'none';
+                  return;
+                }
+
+                sameMsg.style.display = 'none';
+                imgWrap.style.display = '';
+
+                var inpDir = BASE + 'input_' + inp + '/';
+                var outDir = inpDir + 'to_' + out + '/';
+                document.getElementById('cm-input-img').src = inpDir + 'input.png';
+                document.getElementById('cm-gen-img').src   = outDir + 'to_' + out + '.gif';
+                document.getElementById('cm-gt-img').src    = outDir + 'ground_truth.png';
+                document.getElementById('cm-input-img').style.opacity = '1';
+                document.getElementById('cm-gen-img').style.opacity   = '1';
+                document.getElementById('cm-gt-img').style.opacity    = '1';
+                document.getElementById('cm-input-label').textContent = LABELS[inp] + ' (input)';
+              }
+
+              document.getElementById('cm-input').addEventListener('change', update);
+              document.getElementById('cm-output').addEventListener('change', update);
+              update();
+            })();
+          </script>
+
         </div>
       </div>
     </div>
