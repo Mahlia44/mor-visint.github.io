@@ -599,28 +599,30 @@
               <thead>
                 <tr>
                   <th>Model</th>
-                  <th>RGB MSE ($\downarrow$)</th>
-                  <th>Depth MSE ($\downarrow$)</th>
-                  <th>Normals MSE ($\downarrow$)</th>
+                  <th>RGB PPL ($\downarrow$)</th>
                 </tr>
               </thead>
               <tbody>
                 <tr>
                   <td><strong>Vanilla</strong></td>
-                  <td></td><td></td><td></td>
+                  <td><strong>56.598 ± 36.032</strong></td>
                 </tr>
                 <tr>
-                  <td>Random router</td>
-                  <td></td><td></td><td></td>
+                  <td>Random ($N_r{=}3$)</td>
+                  <td>77.094 ± 49.797</td>
                 </tr>
                 <tr>
-                  <td>Token-choice (ours)</td>
-                  <td></td><td></td><td></td>
+                  <td>MoR ($N_r{=}3$, ours)</td>
+                  <td>72.838 ± 49.325</td>
+                </tr>
+                <tr>
+                  <td>MoR ($N_r{=}4$)</td>
+                  <td>83.699 ± 58.420</td>
                 </tr>
               </tbody>
             </table>
             <p style="font-size:0.9em;">
-              <strong>Table 2.</strong> Within-modality reconstruction MSE (25% conditioning ratio).
+              <strong>Table 2.</strong> Within-modality RGB reconstruction perplexity (25% context, 75% generated). Lower is better.
             </p>
           </div>
 
@@ -639,43 +641,135 @@
             <table class="table is-bordered is-striped is-narrow is-hoverable is-fullwidth">
               <thead>
                 <tr>
-                  <th>Input</th>
-                  <th>Output</th>
+                  <th>Direction</th>
                   <th>Metric</th>
                   <th>Vanilla</th>
-                  <th>Random router</th>
-                  <th>Token-choice (ours)</th>
+                  <th>Random ($N_r{=}3$)</th>
+                  <th>MoR ($N_r{=}3$, ours)</th>
+                  <th>MoR ($N_r{=}4$)</th>
                 </tr>
               </thead>
               <tbody>
                 <tr>
-                  <td>RGB</td><td>Scene description</td><td>IoU ($\uparrow$)</td>
-                  <td></td><td></td><td></td>
+                  <td rowspan="2">RGB → Caption</td>
+                  <td>CLIPScore ($\uparrow$)</td>
+                  <td><strong>34.122 ± 2.076</strong></td>
+                  <td>34.093 ± 2.310</td>
+                  <td>33.930 ± 2.232</td>
+                  <td>34.068 ± 2.145</td>
                 </tr>
                 <tr>
-                  <td>RGB</td><td>Caption</td><td>CLIPScore ($\uparrow$)</td>
-                  <td></td><td></td><td></td>
+                  <td>BLEU-4 ($\uparrow$)</td>
+                  <td><strong>0.432 ± 0.227</strong></td>
+                  <td>0.379 ± 0.218</td>
+                  <td>0.406 ± 0.226</td>
+                  <td>0.401 ± 0.219</td>
                 </tr>
                 <tr>
-                  <td>RGB</td><td>Depth</td><td>MSE ($\downarrow$)</td>
-                  <td></td><td></td><td></td>
+                  <td rowspan="2">Caption → RGB</td>
+                  <td>Pixel-MSE ($\downarrow$)</td>
+                  <td>695.751 ± 320.936</td>
+                  <td>816.684 ± 420.484</td>
+                  <td><strong>658.456 ± 288.196</strong></td>
+                  <td>709.690 ± 279.135</td>
                 </tr>
                 <tr>
-                  <td>RGB</td><td>Normals</td><td>MSE ($\downarrow$)</td>
-                  <td></td><td></td><td></td>
-                </tr>
-                <tr>
-                  <td>Depth</td><td>RGB</td><td>MSE ($\downarrow$)</td>
-                  <td></td><td></td><td></td>
-                </tr>
-                <tr>
-                  <td>Normals</td><td>RGB</td><td>MSE ($\downarrow$)</td>
-                  <td></td><td></td><td></td>
+                  <td>SSIM ($\uparrow$)</td>
+                  <td>0.841 ± 0.065</td>
+                  <td>0.833 ± 0.072</td>
+                  <td><strong>0.844 ± 0.063</strong></td>
+                  <td>0.832 ± 0.057</td>
                 </tr>
               </tbody>
             </table>
             <p style="font-size:0.9em;">
-              <strong>Table 3.</strong> Cross-modal generation metrics across modality pairs.
+              <strong>Table 3.</strong> Cross-modal generation metrics. Best result per row in bold.
+            </p>
+          </div>
+
+          <h4 class="title is-5" style="margin-top: 2rem;">RGB → Scene description (object detection)</h4>
+          <p>
+            We also evaluate how well the model recovers structured scene descriptions from RGB
+            input. Predicted descriptions are parsed into object sets and matched to ground-truth
+            objects via Hungarian matching with strict attribute equality (shape, color, and
+            material must all match). This gives a Jaccard score (set IoU), F1, and positional
+            accuracy, as well as per-attribute classification accuracy.
+          </p>
+
+          <div class="table-container" style="margin-top: 1rem;">
+            <table class="table is-bordered is-striped is-narrow is-hoverable is-fullwidth">
+              <thead>
+                <tr>
+                  <th>Metric</th>
+                  <th>Vanilla</th>
+                  <th>Random ($N_r{=}3$)</th>
+                  <th>MoR ($N_r{=}3$, ours)</th>
+                  <th>MoR ($N_r{=}4$)</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>Jaccard ($\uparrow$)</td>
+                  <td><strong>0.830</strong></td>
+                  <td>0.803</td>
+                  <td>&mdash;</td>
+                  <td>0.802</td>
+                </tr>
+                <tr>
+                  <td>F1 ($\uparrow$)</td>
+                  <td><strong>0.893</strong></td>
+                  <td>0.875</td>
+                  <td>0.878</td>
+                  <td>0.872</td>
+                </tr>
+                <tr>
+                  <td>Precision ($\uparrow$)</td>
+                  <td><strong>0.962</strong></td>
+                  <td>0.939</td>
+                  <td>0.946</td>
+                  <td>0.938</td>
+                </tr>
+                <tr>
+                  <td>Recall ($\uparrow$)</td>
+                  <td><strong>0.847</strong></td>
+                  <td>0.832</td>
+                  <td>0.832</td>
+                  <td>0.827</td>
+                </tr>
+                <tr>
+                  <td>Position L2 ($\downarrow$)</td>
+                  <td><strong>0.669</strong></td>
+                  <td>1.075</td>
+                  <td>1.045</td>
+                  <td>0.860</td>
+                </tr>
+                <tr>
+                  <td>Shape accuracy ($\uparrow$)</td>
+                  <td><strong>0.974</strong></td>
+                  <td>0.950</td>
+                  <td>0.956</td>
+                  <td>0.956</td>
+                </tr>
+                <tr>
+                  <td>Color accuracy ($\uparrow$)</td>
+                  <td><strong>0.978</strong></td>
+                  <td>0.964</td>
+                  <td>0.961</td>
+                  <td>0.965</td>
+                </tr>
+                <tr>
+                  <td>Material accuracy ($\uparrow$)</td>
+                  <td><strong>0.985</strong></td>
+                  <td>0.978</td>
+                  <td>0.979</td>
+                  <td>0.977</td>
+                </tr>
+              </tbody>
+            </table>
+            <p style="font-size:0.9em;">
+              <strong>Table 4.</strong> RGB → scene description: object detection metrics on 500
+              samples. Vanilla leads across all metrics; MoR ($N_r{=}3$) is closest on F1 and
+              material accuracy. Jaccard for MoR ($N_r{=}3$) was not reported. Best per row in bold.
             </p>
           </div>
 
