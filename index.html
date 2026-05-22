@@ -214,43 +214,66 @@
     <div class="columns is-centered has-text-centered">
       <div class="column is-full-width">
         <h2 class="title is-3">Overview</h2>
-        <div class="tile is-ancestor is-centered" style="vertical-align: middle;">
-          <div class="tile is-parent">
-            <a href="#intro" class="tile is-child box">
-              <p class="subtitle">
-                <font size="-1">Introduction</font>
-              </p>
-            </a>
-          </div>
-          <div class="tile is-parent">
-            <a href="#related-work" class="tile is-child box">
-              <p class="subtitle">
-                <font size="-1">Related Work</font>
-              </p>
-            </a>
-          </div>
-          <div class="tile is-parent">
-            <a href="#method" class="tile is-child box">
-              <p class="subtitle">
-                <font size="-1">Method</font>
-              </p>
-            </a>
-          </div>
-          <div class="tile is-parent">
-            <a href="#experiments" class="tile is-child box">
-              <p class="subtitle">
-                <font size="-1">Experiments</font>
-              </p>
-            </a>
-          </div>
-          <div class="tile is-parent">
-            <a href="#conclusion" class="tile is-child box">
-              <p class="subtitle">
-                <font size="-1">Conclusion &amp; Limitations</font>
-              </p>
-            </a>
-          </div>
+        <div style="display:flex; gap:0.75rem; justify-content:center; flex-wrap:wrap; margin-top:1rem;">
+          <a href="#intro" class="overview-btn">
+            <span class="overview-num">I</span>
+            <span class="overview-label">Introduction</span>
+          </a>
+          <a href="#related-work" class="overview-btn">
+            <span class="overview-num">II</span>
+            <span class="overview-label">Related Work</span>
+          </a>
+          <a href="#method" class="overview-btn">
+            <span class="overview-num">III</span>
+            <span class="overview-label">Method</span>
+          </a>
+          <a href="#experiments" class="overview-btn">
+            <span class="overview-num">IV</span>
+            <span class="overview-label">Experiments</span>
+          </a>
+          <a href="#conclusion" class="overview-btn">
+            <span class="overview-num">V</span>
+            <span class="overview-label">Conclusion</span>
+          </a>
         </div>
+        <style>
+          .overview-btn {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            width: 130px;
+            padding: 0.9rem 0.5rem;
+            border: 1.5px solid #dbdbdb;
+            border-radius: 8px;
+            background: #fff;
+            color: #363636;
+            text-decoration: none;
+            transition: border-color 0.2s, box-shadow 0.2s, color 0.2s;
+            gap: 0.3rem;
+          }
+          .overview-btn:hover {
+            border-color: #4a4a4a;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.09);
+            color: #111;
+          }
+          .overview-num {
+            font-size: 0.7rem;
+            font-weight: 600;
+            letter-spacing: 0.08em;
+            color: #aaa;
+            text-transform: uppercase;
+          }
+          .overview-btn:hover .overview-num {
+            color: #888;
+          }
+          .overview-label {
+            font-size: 0.88rem;
+            font-weight: 500;
+            text-align: center;
+            line-height: 1.3;
+          }
+        </style>
       </div>
     </div>
     <!------------------------------------------------------------------------->
