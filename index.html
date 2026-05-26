@@ -179,30 +179,7 @@
         <h2 class="title is-3">Abstract</h2>
         <div class="content has-text-justified">
           <p>
-            Standard transformer architectures apply uniform computation to every token, regardless of
-            its semantic complexity. A patch of empty sky is processed by the same number of layers as
-            a patch covering an object boundary &mdash; and this asymmetry only grows when several
-            modalities (RGB, depth, normals, text) share a single sequence. Mixture-of-Recursions
-            (MoR) addresses this in language models by reusing a shared block multiple times and
-            learning a per-token routing policy that decides <em>how many times</em> each token is
-            re-processed. Its extension to vision remains largely unexplored.
-          </p>
-          <p>
-            We adapt MoR to autoregressive image and multimodal generation on CLEVR, building on a
-            SmolLM-135M LLaMA backbone with Middle-Cycle parameter sharing, $N_r{=}3$ recursion
-            steps, and a unified ~242K-token vocabulary covering RGB, depth, normals, and captions.
-            We compare expert-choice and token-choice routers against random-routing and vanilla
-            baselines, and we visualise the learned routing decisions directly on the generated
-            images.
-          </p>
-          <p>
-            <!-- On the unimodal RGB setting, the token-choice MoR runs at roughly ...% fewer training
-            FLOPs than a same-architecture vanilla baseline while producing qualitatively cleaner
-            reconstructions. The learned router does <em>not</em> follow our initial hypothesis: it
-            spends deep recursion on a sparse set of register-like tokens, allocates depth-2 to the
-            predictable background, and uses depth-1 around object boundaries &mdash; an inverted but
-            interpretable compute allocation. The multimodal extension and cross-modal routing
-            analysis are ongoing. --> results summary to write
+            [TODO]
           </p>
         </div>
       </div>
@@ -1016,59 +993,47 @@
         <h2 class="title is-3" id="conclusion">V. Conclusion and Limitations</h2>
         <div class="content has-text-justified">
           <h3 class="title is-4">Summary</h3>
-          <p>
-            This project investigates whether Mixture-of-Recursions, a technique developed for
-            language models, can transfer to vision and multimodal generation. Our Milestone I
-            results on unimodal RGB CLEVR are encouraging: the token-choice router learns a
-            structured, content-dependent depth policy, uses roughly 26% fewer training FLOPs than
-            a vanilla fixed-depth baseline, and produces qualitatively cleaner generations. The
-            routing behavior is interpretable, though it goes against our initial hypothesis: depth
-            concentrates in the background and on a sparse set of register-like tokens, rather than
-            on semantically complex boundaries.
-          </p>
-          <p>
-            Milestone II extends this to the full multimodal setting, training on RGB, depth,
-            normals, and captions. ...
-          </p>
+          <p style="color: #aaa; font-style: italic;">[TODO]</p>
 
           <h3 class="title is-4">Limitations</h3>
-          <p>
-            A few important caveats apply to the current results.
-          </p>
           <ul>
             <li>
-              <strong>Scale and domain.</strong> All results are at the 135M-base scale on CLEVR, a
-              procedurally generated dataset with strong geometric regularity. It is not clear
-              whether the routing patterns we observe would hold on natural images or at larger
-              scale.
+              <strong>Generalization.</strong> The routing behavior we observe is specific to CLEVR,
+              a procedurally generated dataset with strong geometric regularity. It may not
+              generalize to natural images or larger-scale models.
             </li>
             <li>
-              <strong>Missing compute baseline.</strong> A fair answer to RQ3 requires a
-              full-recursion MoR baseline, where every token is always routed to depth $N_r{=}3$,
-              to separate the FLOPs savings of adaptive routing from the effect of the shared
-              architecture alone. This baseline is still being trained.
+              <strong>Generation quality.</strong> Vanilla LLaMA outperforms MoR on several
+              generation metrics. The compute savings come at a cost in raw quality, at least at
+              this scale and on this dataset.
             </li>
             <li>
-              <strong>Expert-choice routing.</strong> We characterized why expert-choice collapses
-              to a positional schedule on autoregressive sequences, but we did not find a fix for
-              it. Combining its load-balancing guarantees with content-dependence remains an open
-              problem.
-            </li>
-            <li>
-              <strong>Multimodal results pending.</strong> The cross-modal generation metrics and
-              the router analysis across modalities (Figures 3 and 4) are based on ongoing
-              Milestone II experiments. This page will be updated with final numbers and figures.
+              <strong>Scaling behavior.</strong> There is uncertainty on how the model scales with
+              the number of parameters. Whether the MoR efficiency gains hold or improve at larger
+              scale remains an open question.
             </li>
           </ul>
 
           <h3 class="title is-4">Future directions</h3>
-          <p>
-            Two directions stand out for follow-up work. First, scaling: it would be interesting
-            to check whether the inverted depth allocation persists at larger $N_r$, on
-            higher-resolution images, or on natural image datasets. Second, combining MoR routing
-            with modality dropout or classifier-free guidance, to test whether adaptive depth
-            interacts with other forms of conditional compute in a non-trivial way.
-          </p>
+          <ul>
+            <li>
+              <strong>Larger models and natural image datasets.</strong> Test whether we reach the
+              same conclusions, on routing behavior and compute efficiency, with larger models or
+              on natural image datasets such as COCO.
+            </li>
+            <li>
+              <strong>More sophisticated routing strategies.</strong> The token-choice and
+              expert-choice routers we explored are relatively simple. More expressive routing
+              mechanisms could close the quality gap with the vanilla baseline while preserving the
+              FLOPs savings.
+            </li>
+            <li>
+              <strong>Other generation techniques.</strong> Our setup uses autoregressive
+              next-token prediction throughout. Exploring other generation paradigms (e.g. masked
+              generation, diffusion-based decoding) in combination with adaptive recursion is a
+              natural next step.
+            </li>
+          </ul>
         </div>
       </div>
     </div>
@@ -1116,22 +1081,16 @@
         <div class="content">
           <h6 class="title is-6">Individual Contributions</h6>
           <p>
-            <strong>Gianfranco Basile</strong> designed the final architectural adaptation of MoR to
-            the visual domain and built the routing infrastructure for the multimodal phase
-            (including dataloaders).
+            <strong>Gianfranco Basile</strong> [TODO]
           </p>
           <p>
-            <strong>Hugues Sibille</strong> refactored the training framework from the original MoR
-            codebase and built the vision inference pipeline: decoded-image overlays, recursion
-            heatmaps, and FLOPs accounting.
+            <strong>Hugues Sibille</strong> [TODO]
           </p>
           <p>
-            <strong>Mahlia Merville-Hipeau</strong> developed the first prototype of MoR adapted to
-            the visual domain and prepared the CLEVR and COCO data pipelines.
+            <strong>Mahlia Merville-Hipeau</strong> [TODO]
           </p>
           <p>
-            <strong>Romane Vorwald</strong> identified the changes required to train the
-            random-router and vanilla fixed-depth baselines.
+            <strong>Romane Vorwald</strong> [TODO]
           </p>
           <p>
             All authors contributed to running experiments, evaluating performance, and writing the
