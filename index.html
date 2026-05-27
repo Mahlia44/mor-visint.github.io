@@ -210,7 +210,7 @@
           </a>
           <a href="#conclusion" class="overview-btn">
             <span class="overview-num">V</span>
-            <span class="overview-label">Conclusion</span>
+            <span class="overview-label">Conclusions & Limitations</span>
           </a>
         </div>
         <style>
@@ -259,7 +259,7 @@
 </section>
 
 
-<!-----------------------------TODO: INTRODUCTION-------------------------------->
+<!-----------------------------INTRODUCTION-------------------------------->
 <section class="section">
   <div class="container is-max-desktop">
     <!-- Introduction. -->
@@ -270,18 +270,17 @@
           <h3 class="title is-4">What is the problem?</h3>
           <p>
             Multimodal vision models such as <strong>4M</strong> <a href="#ref1">[1,</a><a href="#ref2">2]</a>
-            and <strong>TerraMind</strong> <a href="#ref3">[3]</a> process all spatial tokens through
-            the same number of transformer layers; as well as decoder-only approaches like
-            <strong>MaskGIT</strong> <a href="#ref4">[4]</a>. For example, a sky patch receives the
-            same compute as an object boundary. This <em>uniform computation</em> ignores a key
-            asymmetry: different modalities can carry very different information densities at the
-            same spatial location.
+            and <strong>TerraMind</strong> <a href="#ref3">[3]</a>, as well as decoder-only approaches like
+            <strong>MaskGIT</strong> <a href="#ref4">[4]</a>, process all spatial tokens through
+            the same number of Transformer layers. This <em>uniform computation</em> prevents the model from adapting its computational effort to
+            the heterogeneous information content of visual scenes. For example, a visually simple sky patch receives the
+            same amount of processing as an object boundary.
+            Similarly, different modalities can carry very different amount of semantic information at the same spatial location.
           </p>
           <p>
-            <strong>Mixture-of-Recursions (MoR)</strong> <a href="#ref5">[5]</a> addresses this in
-            language by learning per-token recursion depth via lightweight routers: a shared
+            Bae et al. address a related limitation in language modeling  with <strong>Mixture-of-Recursions (MoR)</strong> <a href="#ref5">[5]</a> by learning per-token recursion depth via lightweight routers: a shared
             parameter block is applied a variable number of times depending on each token's
-            complexity. We propose to extend MoR to vision and multimodal image generation, which
+            complexity. In this way, tokens can receive different amounts of computation depending on their estimated complexity. However, MoR was designed to generate text. In this project, we propose to adapt their approach to images and multimodal generation, which
             leads to the following research questions:
           </p>
           <ul>
@@ -304,20 +303,22 @@
           <p>
             <strong>Efficiency.</strong> In the original MoR paper, adaptive recursion achieves
             lower validation loss with ~50% fewer parameters than vanilla transformers under equal
-            training compute <a href="#ref5">[5]</a>. Extending this to vision, where token
-            sequences are long, could yield significant savings in training time and memory.
+            training compute <a href="#ref5">[5]</a>. Extending this idea to vision is particularly
+            relevant because images are represented as many spatial tokens, making computation and activation memory scale
+            quickly with sequence length. Adaptive recursion could therefore reduce training FLOPs and
+            memory usage by allocating deeper processing only to tokens that need it.
           </p>
           <p>
             <strong>Interpretability.</strong> Routing patterns provide a direct lens into how the
-            model allocates computation. Visualizing which image patches or modalities receive
-            deeper recursion offers insights unavailable in standard architectures, and mirrors
-            biological vision's selective allocation to salient regions <a href="#ref6">[6]</a>.
+            model allocates computation across the input. By visualizing which image patches or modalities are assigned
+            deeper recursion, we can inspect the model’s internal compute-allocation strategy, which is not directly accessible in standard Transformer architectures.
+            This is particularly relevant for vision, where adaptive routing can reveal whether the model prioritizes semantically rich or visually salient regions,
+            similarly to selective processing mechanisms in biological vision <a href="#ref6">[6]</a>.
           </p>
           <p>
-            <strong>Generalization to new domains.</strong> MoR was introduced in language
-            modeling, and its extension to non-text domains remains largely unexplored. Our work
-            directly tests whether adaptive token-level computation transfers to visual and
-            multimodal generation.
+            <strong>Generalization to new domains.</strong> MoR was originally introduced for language
+            modeling, where adaptive recursion is applied to text tokens. However, whether this form of token-level adaptive computation can transfer to non-text domains remains largely unexplored. Our work
+            addresses this gap by investigating its application to visual and multimodal generation.
           </p>
         </div>
       </div>
@@ -376,7 +377,7 @@
 </section>
 <!------------------------------------------------------------------------->
 
-<!-----------------------------TODO: METHOD-------------------------------->
+<!-----------------------------METHOD-------------------------------->
 <section class="section">
   <div class="container is-max-desktop">
     <!-- Method. -->
@@ -384,21 +385,38 @@
       <div class="column is-full-width">
         <h2 class="title is-3" id="method">III. Method</h2>
         <div class="content has-text-justified">
-          <h3 class="title is-4">Architecture</h3>
+          <h3 class="title is-4">Overview</h3>
+          <p>
+            This section describes the methodological pipeline used in our MoR-for-Vision framework. We first introduce how
+            visual and textual modalities are converted into a shared discrete token representation. We then describe the recursive
+            decoder architecture and justify our choice of token-choice routing, based on
+            the limitations observed with expert-choice routing. Finally, we explain how the model performs autoregressive generation and present the experimental
+            protocol and baselines used to evaluate the contribution of learned adaptive
+            recursion.
+          </p>
+
+          <h3 class="title is-4">Multimodal Tokenization</h3>
+          <p>
+            Visual modalities are discretized by the
+            <strong>Cosmos DI-16&times;16</strong> tokenizer <a href="#ref7">[7]</a>, producing 256
+            tokens per $256{\times}256$ image, and text modalities are tokenized with GPT-2 BPE. All modalities are mapped into a single discrete token space, so training reduces to
+            standard next-token prediction. The resulting unified
+            vocabulary contains 242,271 tokens, with separate codebook slots for RGB,
+            depth, normals, and captions.
+          </p>
+
+          <p>
+            For each sample, token sequences from the modalities are concatenated into a single flat sequence following a fixed ordering
+            (RGB, depth, normals, text). This allows the model to condition on one modality and generate another using the same autoregressive objective.
+          </p>
+
+          <h3 class="title is-4">Recursive Decoder Architecture</h3>
+
           <p>
             We build on a SmolLM-135M LLaMA-based <a href="#ref8">[8]</a> decoder-only transformer
-            with <strong>Middle-Cycle parameter sharing</strong> and $N_r{=}3$ recursion steps.
-            All modalities are mapped into a single discrete token space, so training reduces to
-            standard next-token prediction. Visual modalities are discretized by the
-            <strong>Cosmos DI-16&times;16</strong> tokenizer <a href="#ref7">[7]</a>, producing 256
-            tokens per $256{\times}256$ image, and text uses the GPT-2 BPE tokenizer. The full
-            vocabulary covers roughly 242K tokens, with disjoint codebook slots reserved for RGB,
-            depth, normals, and captions. Token sequences from each modality are
-            concatenated into a single flat sequence following a fixed ordering
-            (RGB, depth, normals, text). A shared recursive block $f_\theta$ is then applied up to
-            $N_r$ times, and a lightweight router decides per token how many recursion steps to take.
-            We use recursion-wise KV caching so that tokens exiting early do not pay attention cost
-            at deeper recursions.
+            with <strong>Middle-Cycle parameter sharing</strong> and $N_r{=}3$ recursion steps, following the MoR setup <a href="#ref5">[5]</a>.
+            Instead of using a different transformer block at each depth, the model reuses a shared recursive block $f_\theta$ several times. This allows the model to
+            increase the effective computation depth without increasing the number of parameters proportionally.
           </p>
 
           <div align="center" class="box">
@@ -409,61 +427,113 @@
               <font size="-0.7">
                 <span style="font-weight:normal">
                   <strong>Figure 1.</strong> Overview of our MoR-for-Vision architecture. Each modality
-                  is tokenized by its own tokenizer and concatenated into a single sequence. A shared
-                  recursive block is applied up to $N_r{=}3$ times; the router decides per token
-                  whether to continue to the next recursion or exit early.
+                  is tokenized by its own tokenizer and concatenated into a single sequence. A token-choice router assigns each token
+                  a recursion depth, determining how many times it passes through the shared block. The shared
+                  recursive block is then applied up to $N_r{=}3$ times.
                 </span>
               </font>
             </h5>
           </div>
 
-          <h3 class="title is-4">Two-phase experimental plan</h3>
+          <h3 class="title is-4">Routing Strategy: Why We Use Only Token-Choice</h3>
+
           <p>
-            We split our work into two milestones, where findings from the first directly inform the
-            design choices of the second.
+            We initially considered two routing strategies: <strong>expert-choice</strong> and <strong>token-choice</strong>.
+          </p>
+
+          <p>
+            <strong>Expert-choice routing</strong> selects, at each recursion depth, the top-$k$ tokens to
+            process further, enforcing a fixed computational budget per recursion depth. However, we found in
+            the unimodal RGB experiments that the cheapest way for the
+            model to satisfy this budget while minimizing loss is to converge to a position-dependent pattern,
+            routing early-sequence tokens deep and later tokens shallow, regardless of image content
+            (see §IV). We even tested whether this positional collapse could be mitigated by randomly shuffling visual tokens during autoregressive training while
+            retaining their original positional embeddings, inspired by prior work on randomized or
+            order-agnostic autoregressive generation <a href="#ref14">[14]</a><a href="#ref15">[15]</a>. However, the resulting routing behavior remained qualitatively unchanged (see §IV). This made expert-choice unsuitable for studying content-dependent visual routing.
+          </p>
+
+          <p>
+            For this reason, our final model uses <strong>token-choice routing</strong>.
+            Instead of choosing a fixed number of tokens per recursion depth, each token
+            independently receives a recursion-depth assignment from the start. This gives
+            the model more flexibility to allocate computation based on the token itself,
+            rather than on a global top-$k$ budget. In our experiments, token-choice routing
+            produced a content-dependent depth distribution and was therefore used for the final MoR-for-Vision model.
+          </p>
+
+          <p>
+            The router output at each
+            recursion is mixed back into the residual stream with a scalar weight $\alpha$, which
+            controls how strongly the routing decision influences the representation. We found $\alpha{=}1.0$ to be critical: smaller values caused the
+            router to collapse to a single depth, while $\alpha{=}1.0$ encouraged
+            differentiation between depth 1, depth 2, and depth 3 tokens (reported in §IV).
+          </p>
+          
+          <h3 class="title is-4">Autoregressive Generation</h3>
+
+          <p>
+            During autoregressive generation, the model predicts the output sequence one token at a time.
+            At generation step $t$, all previous tokens in the prefix are used to predict the next token.
+            During the first recursion pass, all prefix tokens enter the shared recursive block. During the second
+            pass, only tokens assigned to depth 2 or 3 are processed again. During the third pass, only
+            tokens assigned to depth 3 are processed. Because we use $N_r{=}3$, there are at most three
+            recursive passes.
+          </p>
+
+          <p>
+            After the recursive block, the hidden state is passed
+            to the final transformer layer and then to the Language Modeling head, which outputs 242,271 logits over the
+            shared multimodal vocabulary. The selected token is appended to the sequence and used as context
+            for the next generation step. For visual
+            modalities, the generated discrete tokens are finally decoded back into an
+            image.
+          </p>
+
+          <p>
+            Recursion-wise KV caching is used to make this generation process more efficient. Tokens assigned to
+            shallower recursion depths do not need to be recomputed at deeper recursion passes, and previously
+            generated tokens can be reused when predicting the next token.
+          </p>
+
+          <div align="center" class="box" style="overflow: visible;">
+            <div style="width: 100%; max-width: 800px; margin: 0 auto; aspect-ratio: 16 / 9;">
+              <video controls preload="metadata" playsinline
+                     style="width: 100%; height: 100%; display: block; object-fit: contain;">
+                <source src="./static/videos/implementation_video.mp4" type="video/mp4">
+                Your browser does not support the video tag.
+              </video>
+            </div>
+          
+            <h5 class="subtitle has-text-centered" style="margin-top: 1rem;">
+              <font size="-0.7">
+                <span style="font-weight:normal">
+                  <strong>Video 1.</strong> Implementation overview of our MoR-for-Vision pipeline,
+                  showing the multimodal tokenization, routing behavior, and autoregressive generation process.
+                </span>
+              </font>
+            </h5>
+          </div>
+
+
+
+          <h3 class="title is-4">Experimental Protocol</h3>
+          <p>
+            We organized the experiments in two stages:
           </p>
           <p>
             <strong>Milestone I, unimodal proof of concept.</strong> We first train MoR on RGB only,
-            to verify that adaptive recursion transfers from language to vision at all. This phase
-            lets us study routing behavior in a controlled setting, compare expert-choice and
-            token-choice strategies, and tune the key hyperparameters (in particular the residual
-            mixing weight $\alpha$) before adding the complexity of multiple modalities.
+            to verify that adaptive recursion transfers from language to vision at all. This stage
+            lets us test whether adaptive recursion transfers from language to vision, compare expert-choice and
+            token-choice routing strategies, and tune the key hyperparameters (in particular the residual
+            mixing weight $\alpha$) to select the final token-choice configuration before introducing multiple modalities.
           </p>
           <p>
             <strong>Milestone II, multimodal setting.</strong> Using the insights from Milestone I,
-            we extend training to RGB, depth, normals, and captions. The router architecture and
-            $\alpha$ value identified in Milestone I carry over directly. Our initial plan called for
-            one dedicated router per modality, but Milestone I results led us to revise this: we now
+            we extend the model to multimodal setting with RGB, depth, normals, and captions. The token-choice router and
+            $\alpha$ value selected in Milestone I are carried over to the multimodal experiments. Our initial plan called for
+            one dedicated router per modality, but Milestone I results led us to revise this. Therefore, we
             use a single shared router trained with random modality orderings, so that the router
             sees all modality types in context and cross-modal routing patterns can be studied (RQ2).
-            A per-modality router variant is kept as a planned ablation.
-          </p>
-
-          <h3 class="title is-4">Routing strategies</h3>
-          <p>
-            At each recursion step, the router scores every active token and decides whether it
-            should pass through the block again or exit. We compare two strategies that differ in
-            who makes the routing decision.
-          </p>
-          <p>
-            <strong>Expert-choice routing</strong> frames the problem from the recursion stage's
-            perspective: each stage selects the top-$k$ tokens by router score, enforcing a fixed
-            token budget per recursion depth. This guarantees load balancing, but the constraint
-            is purely on count, not on content. In practice we found that the cheapest way for the
-            model to satisfy this budget while minimizing loss is to adopt a positional schedule,
-            routing early-sequence tokens deep and later tokens shallow, regardless of image content
-            (see §IV).
-          </p>
-          <p>
-            <strong>Token-choice routing</strong> flips the perspective: each token independently
-            decides its own recursion depth, drawing from a discrete distribution over depths induced
-            by its router scores. There is no fixed budget per stage, so the model is free to
-            allocate depth based on token content rather than position. The router output at each
-            recursion is mixed back into the residual stream with a scalar weight $\alpha$, which
-            controls how strongly the routing decision influences the representation. We found
-            $\alpha{=}1.0$ to be critical: smaller values cause the router to collapse to a single
-            depth, while $\alpha{=}1.0$ rewards differentiation and produces the three-mode depth
-            distribution reported in §IV.
           </p>
 
           <h3 class="title is-4">Baselines</h3>
@@ -472,15 +542,14 @@
             baselines.
           </p>
           <p>
-            The <strong>vanilla SmolLM-135M</strong> is a standard fixed-depth transformer with no
-            recursion and no router, trained under the same conditions. It represents the compute
+            The <strong>vanilla SmolLM-135M baseline</strong> is a standard fixed-depth transformer with no
+            recursion and no router, trained under the same conditions. It represents the fixed-compute
             upper bound and the quality target we aim to match or exceed with fewer FLOPs.
           </p>
           <p>
-            The <strong>random-router MoR</strong> uses the same recursive architecture as our model
-            but samples routing decisions uniformly at random rather than learning them. Comparing
-            against this baseline isolates the contribution of the <em>learned</em> routing policy
-            from the effect of the recursive architecture alone.
+            The <strong>random-router MoR baseline</strong> uses the same recursive architecture as our model
+            but assigns recursion depths randomly instead of learning them. Comparing against this baseline separates the effect of the
+            recursive architecture from the effect of learned routing.
           </p>
         </div>
       </div>
@@ -490,7 +559,7 @@
 </section>
 <!------------------------------------------------------------------------->
 
-<!-----------------------------TODO: EXPERIMENTS-------------------------------->
+<!-----------------------------EXPERIMENTS-------------------------------->
 <section class="section">
   <div class="container is-max-desktop">
     <!-- Experiments. -->
@@ -499,15 +568,13 @@
         <h2 class="title is-3" id="experiments">IV. Experiments &amp; Results</h2>
         <div class="content has-text-justified">
 
-          <h3 class="title is-4">Setup</h3>
+          <h3 class="title is-4">Dataset and Training Setup</h3>
           <p>
-            All models are trained on the multimodal CLEVR dataset <a href="#ref13">[13]</a>
+            All models are trained on the multimodal <strong>CLEVR dataset</strong> <a href="#ref13">[13]</a>
             (70K scenes), which provides pre-tokenized RGB, depth, surface normals, scene
             descriptions, and captions via the Cosmos DI-16&times;16 tokenizer (256 discrete tokens
             per visual modality). Milestone I trains on RGB only for 19,500 steps following the
-            original MoR configuration <a href="#ref5">[5]</a>. Milestone II extends training to all
-            four modalities with random ordering. Training loss is standard next-token prediction;
-            FLOPs are total training compute.
+            original MoR configuration <a href="#ref5">[5]</a>.
           </p>
 
           <div class="table-container" style="margin-bottom: 0.5rem;">
@@ -522,19 +589,19 @@
               </thead>
               <tbody>
                 <tr>
-                  <td><strong>Vanilla</strong> (fixed depth)</td>
+                  <td><strong>Vanilla</strong> (no recursion)</td>
                   <td>242.2</td>
                   <td>$7.91 \times 10^{17}$</td>
                   <td><strong>3.29</strong></td>
                 </tr>
                 <tr>
-                  <td>Random router</td>
+                  <td>Random router MoR</td>
                   <td>178.5</td>
                   <td>$2.79 \times 10^{17}$</td>
                   <td>3.58</td>
                 </tr>
                 <tr>
-                  <td>Token-choice (ours)</td>
+                  <td>Token-choice MoR (ours)</td>
                   <td>179.2</td>
                   <td>$3.05 \times 10^{17}$</td>
                   <td>3.62</td>
@@ -549,13 +616,64 @@
             </table>
             <p style="font-size: 0.9em;">
               <strong>Table 1.</strong> Parameters, training FLOPs and final loss at 19,500 steps
-              (Milestone I, RGB only). Token-choice MoR uses ~26% fewer training FLOPs than the
+              (Milestone I, RGB only). Best result per row in bold. Token-choice MoR uses ~26% fewer training FLOPs than the
               vanilla baseline while staying within 0.33 of its training loss.
             </p>
           </div>
 
+          <p>
+            Milestone II extends training to all
+            four modalities with random ordering, but only for 5,000 steps due to computational constraints. In practice, training the multimodal model for substantially longer would have required approximately
+            one full week on the Izar cluster, which was not feasible within the project
+            timeline. Training loss is standard next-token prediction, and FLOPs are total training compute.
+          </p>
+
+          <div class="table-container" style="margin-bottom: 0.5rem;">
+            <table class="table is-bordered is-striped is-narrow is-hoverable is-fullwidth">
+              <thead>
+                <tr>
+                  <th>Model</th>
+                  <th># Params (M)</th>
+                  <th>Training FLOPs</th>
+                  <th>Train loss ($\downarrow$)</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><strong>Vanilla</strong> (no recursion)</td>
+                  <td>242.2</td>
+                  <td>$8.05 \times 10^{17}$</td>
+                  <td><strong>2.09</strong></td>
+                </tr>
+                <tr>
+                  <td>Random router MoR</td>
+                  <td>178.5</td>
+                  <td>$3.07 \times 10^{17}$</td>
+                  <td>2.27</td>
+                </tr>
+                <tr>
+                  <td>Token-choice MoR (ours)</td>
+                  <td>179.2</td>
+                  <td>$3.18 \times 10^{17}$</td>
+                  <td>2.27</td>
+                </tr>
+              </tbody>
+            </table>
+            <p style="font-size: 0.9em;">
+              <strong>Table 2.</strong> Parameters, training FLOPs and final loss at 5,000 steps
+              (Milestone II, multimodal training). Best result per row in bold. Token-choice MoR uses ~61% fewer training FLOPs than the
+              vanilla baseline while staying within 0.18 of its training loss.
+            </p>
+          </div>
+
+          <p>
+            The token-choice MoR model remains close to the vanilla fixed-depth baseline in terms of training loss while requiring
+            substantially less training compute. This trade-off is especially notable in the multimodal setting: despite using approximately 61% fewer training FLOPs,
+            the token-choice model reaches a final loss only 0.18 higher than the vanilla model.
+          </p>
+
           <!-- ===================== WITHIN-MODALITY ===================== -->
-          <h3 class="title is-4" style="margin-top: 2rem;">Within-modality reconstruction</h3>
+          <h3 class="title is-4" style="margin-top: 2rem;">RGB-Only Inference: Conditional Generation</h3>
           <p>
             To evaluate reconstruction quality within a single modality, we condition the model on
             the first 25% of tokens from a given modality sequence and ask it to generate the
@@ -567,31 +685,37 @@
 
           <div class="columns is-centered" style="margin-top: 1.5rem;">
             <div class="column is-one-third">
-              <div align="center" class="box" style="height: 220px; display:flex; flex-direction:column; align-items:center; justify-content:center; background:#fafafa; border: 2px dashed #dbdbdb;">
-                <p style="color:#aaa; font-style:italic; margin:0;">Token-choice</p>
-                <p style="color:#ccc; font-size:0.8em; margin-top:0.3rem;">sample to be added</p>
+              <div align="center" class="box" style="height: 220px; display:flex; align-items:center; justify-content:center;">
+                <img src="./static/images/MoR_RGB.png"
+                     alt="RGB conditional generation result for token-choice MoR"
+                     style="max-width: 100%; max-height: 100%; object-fit: contain;">
               </div>
-              <p style="text-align:center; font-size:0.85em; margin-top:0.4rem;">(a) Token-choice</p>
+              <p style="text-align:center; font-size:0.85em; margin-top:0.4rem;">(a) Token-choice MoR</p>
             </div>
+          
             <div class="column is-one-third">
-              <div align="center" class="box" style="height: 220px; display:flex; flex-direction:column; align-items:center; justify-content:center; background:#fafafa; border: 2px dashed #dbdbdb;">
-                <p style="color:#aaa; font-style:italic; margin:0;">Random router</p>
-                <p style="color:#ccc; font-size:0.8em; margin-top:0.3rem;">sample to be added</p>
+              <div align="center" class="box" style="height: 220px; display:flex; align-items:center; justify-content:center;">
+                <img src="./static/images/random_router_RGB.png"
+                     alt="RGB conditional generation result for random-router baseline"
+                     style="max-width: 100%; max-height: 100%; object-fit: contain;">
               </div>
               <p style="text-align:center; font-size:0.85em; margin-top:0.4rem;">(b) Random router</p>
             </div>
+          
             <div class="column is-one-third">
-              <div align="center" class="box" style="height: 220px; display:flex; flex-direction:column; align-items:center; justify-content:center; background:#fafafa; border: 2px dashed #dbdbdb;">
-                <p style="color:#aaa; font-style:italic; margin:0;">Vanilla</p>
-                <p style="color:#ccc; font-size:0.8em; margin-top:0.3rem;">sample to be added</p>
+              <div align="center" class="box" style="height: 220px; display:flex; align-items:center; justify-content:center;">
+                <img src="./static/images/vanilla_llama_RGB.png"
+                     alt="RGB conditional generation result for vanilla LLaMA baseline"
+                     style="max-width: 100%; max-height: 100%; object-fit: contain;">
               </div>
-              <p style="text-align:center; font-size:0.85em; margin-top:0.4rem;">(c) Vanilla</p>
+              <p style="text-align:center; font-size:0.85em; margin-top:0.4rem;">(c) Vanilla LLaMA</p>
             </div>
           </div>
+          
           <p style="text-align:center; font-size:0.9em;">
-            <strong>Figure 2.</strong> Within-modality conditional generation (25% context, 75%
-            generated) for each model. Qualitative comparison across token-choice MoR, random
-            router, and vanilla baseline.
+            <strong>Figure 2.</strong> RGB-only conditional generation at inference time
+            using 25% context and 75% autoregressive generation. Qualitative comparison
+            across token-choice MoR, random-router MoR, and vanilla LLaMA baselines.
           </p>
 
           <div class="table-container" style="margin-top: 1.5rem;">
@@ -604,30 +728,35 @@
               </thead>
               <tbody>
                 <tr>
-                  <td><strong>Vanilla</strong></td>
+                  <td><strong>Vanilla</strong> (no recursion)</td>
                   <td><strong>56.598 ± 36.032</strong></td>
                 </tr>
                 <tr>
-                  <td>Random ($N_r{=}3$)</td>
+                  <td>Random router MoR</td>
                   <td>77.094 ± 49.797</td>
                 </tr>
                 <tr>
-                  <td>MoR ($N_r{=}3$, ours)</td>
+                  <td>Token-choice MoR (ours)</td>
                   <td>72.838 ± 49.325</td>
-                </tr>
-                <tr>
-                  <td>MoR ($N_r{=}4$)</td>
-                  <td>83.699 ± 58.420</td>
                 </tr>
               </tbody>
             </table>
             <p style="font-size:0.9em;">
-              <strong>Table 2.</strong> Within-modality RGB reconstruction perplexity (25% context, 75% generated). Lower is better.
+              <strong>Table 3.</strong> Within-modality RGB reconstruction perplexity (25% context, 75% generated). Lower is better and best result per row in bold.
             </p>
           </div>
 
+          <p>
+            Perplexity (PPL) measures how uncertain the model is when predicting the next token. Lower perplexity means the model assigns higher probability to the
+            correct continuation and therefore generates the RGB sequence more confidently.
+            In this RGB-only reconstruction setting, the vanilla fixed-depth model obtains the lowest perplexity, while token-choice MoR improves over the random-router
+            baseline but remains higher than vanilla. This suggests that learned routing is
+            beneficial compared with random recursion-depth assignment, although the
+            fixed-depth baseline still performs best.
+          </p>
+
           <!-- ===================== CROSS-MODAL ===================== -->
-          <h3 class="title is-4" style="margin-top: 2.5rem;">Cross-modal generation</h3>
+          <h3 class="title is-4" style="margin-top: 2.5rem;">Cross-Modal Generation</h3>
           <p>
             We condition the model on one full input modality and generate a target modality
             autoregressively. Different output types call for different metrics. For dense visual
@@ -643,10 +772,9 @@
                 <tr>
                   <th>Direction</th>
                   <th>Metric</th>
-                  <th>Vanilla</th>
-                  <th>Random ($N_r{=}3$)</th>
-                  <th>MoR ($N_r{=}3$, ours)</th>
-                  <th>MoR ($N_r{=}4$)</th>
+                  <th>Vanilla (no recursion)</th>
+                  <th>Random router MoR</th>
+                  <th>Token-Choice MoR (ours)</th>
                 </tr>
               </thead>
               <tbody>
@@ -656,14 +784,12 @@
                   <td><strong>34.122 ± 2.076</strong></td>
                   <td>34.093 ± 2.310</td>
                   <td>33.930 ± 2.232</td>
-                  <td>34.068 ± 2.145</td>
                 </tr>
                 <tr>
                   <td>BLEU-4 ($\uparrow$)</td>
                   <td><strong>0.432 ± 0.227</strong></td>
                   <td>0.379 ± 0.218</td>
                   <td>0.406 ± 0.226</td>
-                  <td>0.401 ± 0.219</td>
                 </tr>
                 <tr>
                   <td rowspan="2">Caption → RGB</td>
@@ -671,19 +797,17 @@
                   <td>695.751 ± 320.936</td>
                   <td>816.684 ± 420.484</td>
                   <td><strong>658.456 ± 288.196</strong></td>
-                  <td>709.690 ± 279.135</td>
                 </tr>
                 <tr>
                   <td>SSIM ($\uparrow$)</td>
                   <td>0.841 ± 0.065</td>
                   <td>0.833 ± 0.072</td>
                   <td><strong>0.844 ± 0.063</strong></td>
-                  <td>0.832 ± 0.057</td>
                 </tr>
               </tbody>
             </table>
             <p style="font-size:0.9em;">
-              <strong>Table 3.</strong> Cross-modal generation metrics. Best result per row in bold.
+              <strong>Table 4.</strong> Cross-modal generation metrics. Best result per row in bold.
             </p>
           </div>
 
@@ -767,21 +891,21 @@
               </tbody>
             </table>
             <p style="font-size:0.9em;">
-              <strong>Table 4.</strong> RGB → scene description: object detection metrics on 500
+              <strong>Table 5.</strong> RGB → scene description: object detection metrics on 500
               samples. Vanilla leads across all metrics; MoR ($N_r{=}3$) is closest on F1 and
               material accuracy. Jaccard for MoR ($N_r{=}3$) was not reported. Best per row in bold.
             </p>
           </div>
 
-          <p style="margin-top: 1rem;">
-            Browse generated outputs for each modality pair using the interactive viewer below.
+          <h3 class="title is-4">Modality-To-Modality Generation</h3>
+
+          <p>
+            You can browse generated outputs for each modality pair using the interactive viewer below.
             For each combination, we show the input, the model's generated output, and the ground
             truth side by side.
           </p>
 
-          <h3 class="title is-4">Modality-to-modality generation</h3>
           <p>
-            Given one input modality, the model autoregressively generates a target modality.
             Select an input and an output below to visualise the generated result.
           </p>
 
@@ -877,7 +1001,7 @@
           </script>
 
           <!-- ===================== ROUTER ANALYSIS ===================== -->
-          <h3 class="title is-4" style="margin-top: 2.5rem;">Router analysis</h3>
+          <h3 class="title is-4" style="margin-top: 2.5rem;">Router Analysis</h3>
           <p>
             Beyond generation quality, we want to understand what the router actually learns. We
             look at three complementary views: the average recursion depth it assigns per modality,
@@ -895,18 +1019,20 @@
           </p>
           <div class="columns is-centered" style="margin-top: 1rem;">
             <div class="column is-three-quarters">
-              <div class="box" style="height: 260px; display:flex; flex-direction:column; align-items:center; justify-content:center; background:#fafafa; border: 2px dashed #dbdbdb;">
-                <p style="color:#aaa; font-style:italic; margin:0;">Bar plot to be added</p>
-                <p style="color:#ccc; font-size:0.8em; margin-top:0.3rem;">
-                  x-axis: output modality, grouped bars per conditioning modality, y-axis: avg recursion depth
-                </p>
+              <div class="box" style="display:flex; align-items:center; justify-content:center;">
+                <img src="./static/images/barplots_router_analysis.png"
+                     alt="Average recursion depth per output modality and conditioning modality"
+                     style="width: 100%; max-width: 800px; height: auto; object-fit: contain;">
               </div>
             </div>
           </div>
+          
           <p style="text-align:center; font-size:0.9em; margin-top:0.5rem;">
             <strong>Figure 3.</strong> Average recursion depth per output modality, broken down by
-            conditioning modality. Differences across bars indicate that the router allocates
-            compute differently depending on both what is being generated and what context it has.
+            conditioning modality. The left panel shows the results for the token-choice MoR model,
+            while the right panel shows the random-router MoR baseline. Differences across bars indicate
+            how the router allocates computation depending on both the generated modality and the
+            conditioning modality.
           </p>
 
           <h4 class="title is-5" style="margin-top:2rem;">Depth distribution per modality</h4>
@@ -919,18 +1045,19 @@
           </p>
           <div class="columns is-centered" style="margin-top: 1rem;">
             <div class="column">
-              <div class="box" style="height: 260px; display:flex; flex-direction:column; align-items:center; justify-content:center; background:#fafafa; border: 2px dashed #dbdbdb;">
-                <p style="color:#aaa; font-style:italic; margin:0;">Depth distribution plots to be added</p>
-                <p style="color:#ccc; font-size:0.8em; margin-top:0.3rem;">
-                  one histogram per modality, x-axis: recursion depth {1, 2, 3}, y-axis: fraction of tokens
-                </p>
+              <div class="box" style="display:flex; align-items:center; justify-content:center;">
+                <img src="./static/images/histograms_router_analysis.png"
+                     alt="Distribution of recursion depths by modality for token-choice MoR and random-router MoR"
+                     style="width: 100%; max-width: 900px; height: auto; object-fit: contain;">
               </div>
             </div>
           </div>
+          
           <p style="text-align:center; font-size:0.9em; margin-top:0.5rem;">
             <strong>Figure 4.</strong> Distribution of recursion depths across tokens, broken down
             by modality. Each bar shows the fraction of tokens routed to depth 1, 2, or 3 for that
-            modality.
+            modality. The left panel shows the depth distributions for the token-choice MoR model,
+            while the right panel shows the random-router MoR baseline.
           </p>
 
           <h4 class="title is-5" style="margin-top:2rem;">Expert-choice collapse</h4>
@@ -946,7 +1073,7 @@
           <div class="columns is-centered" style="margin-top: 1rem;">
             <div class="column is-half">
               <div align="center" class="box">
-                <img src="./static/images/depth_token_choice_placeholder.png"
+                <img src="./static/images/token-inference.png"
                      alt="Per-token recursion depth heatmap, token-choice router."
                      style="width: 100%;">
                 <h5 class="subtitle has-text-centered">
@@ -959,7 +1086,7 @@
             </div>
             <div class="column is-half">
               <div align="center" class="box">
-                <img src="./static/images/depth_expert_choice_placeholder.png"
+                <img src="./static/images/expert-inference.png"
                      alt="Per-token recursion depth heatmap, expert-choice router."
                      style="width: 100%;">
                 <h5 class="subtitle has-text-centered">
@@ -993,7 +1120,26 @@
         <h2 class="title is-3" id="conclusion">V. Conclusion and Limitations</h2>
         <div class="content has-text-justified">
           <h3 class="title is-4">Summary</h3>
-          <p style="color: #aaa; font-style: italic;">[TODO]</p>
+          <p>
+            This project investigates whether Mixture-of-Recursions, a technique developed for
+            language models, can transfer to vision and multimodal generation. Our Milestone I
+            results on unimodal RGB CLEVR are encouraging: the token-choice router learns a
+            structured, content-dependent depth policy, uses roughly 26% fewer training FLOPs than
+            a vanilla fixed-depth baseline, and produces qualitatively cleaner generations. The
+            routing behavior is interpretable, though it goes against our initial hypothesis: depth
+            concentrates in the background and on a sparse set of register-like tokens, rather than
+            on semantically complex boundaries.
+          </p>
+          <p>
+            Milestone II extends this to the full multimodal setting, training on RGB, depth,
+            normals, and captions. Although this stage was limited to 5,000 steps
+            due to computational reasons, token-choice MoR remains
+            competitive with the vanilla fixed-depth baseline while using approximately 61% fewer training FLOPs. Cross-modal generation
+            results are mixed, but promising. The vanilla model remains stronger for most generation tasks, with only the caption-to-RGB task as an exception, where
+            token-choice MoR performs best. Together, these results suggest that adaptive
+            recursion can scale to multimodal generation and provide a strong compute-quality
+            trade-off.
+          </p>
 
           <h3 class="title is-4">Limitations</h3>
           <ul>
@@ -1001,6 +1147,19 @@
               <strong>Generalization.</strong> The routing behavior we observe is specific to CLEVR,
               a procedurally generated dataset with strong geometric regularity. It may not
               generalize to natural images or larger-scale models.
+              <strong>Scale and domain.</strong> All results are conducted at the 135M-base scale on CLEVR, a
+              procedurally generated dataset with strong geometric regularity. It is therefore not clear
+              whether the routing patterns we observe would hold on natural images or at larger
+              scale. In particular, we do not yet know whether the same token-depth allocation strategy would be the same.
+            </li>
+            <li>
+              <strong>Generation quality gap with vanilla LLaMA.</strong> Although
+              token-choice MoR provides a favorable compute-quality trade-off, the vanilla
+              fixed-depth LLaMA baseline still outperforms MoR on several generation
+              metrics, especially for RGB-to-caption generation and structured
+              scene-description recovery. This suggests that adaptive recursion reduces
+              compute but does not yet consistently match the predictive quality of the
+              fixed-depth model across all tasks.
             </li>
             <li>
               <strong>Generation quality.</strong> Vanilla LLaMA outperforms MoR on several
@@ -1008,32 +1167,45 @@
               this scale and on this dataset.
             </li>
             <li>
-              <strong>Scaling behavior.</strong> There is uncertainty on how the model scales with
-              the number of parameters. Whether the MoR efficiency gains hold or improve at larger
-              scale remains an open question.
+              <strong>Limited multimodal training budget.</strong> The multimodal model was
+              trained for only 5,000 steps due to computational constraints. While the
+              results are promising, longer training would be needed to assess whether MoR
+              can close the remaining gap with the vanilla baseline and whether the learned
+              cross-modal routing patterns remain stable.
             </li>
           </ul>
 
           <h3 class="title is-4">Future directions</h3>
-          <ul>
-            <li>
-              <strong>Larger models and natural image datasets.</strong> Test whether we reach the
-              same conclusions, on routing behavior and compute efficiency, with larger models or
-              on natural image datasets such as COCO.
-            </li>
-            <li>
-              <strong>More sophisticated routing strategies.</strong> The token-choice and
-              expert-choice routers we explored are relatively simple. More expressive routing
-              mechanisms could close the quality gap with the vanilla baseline while preserving the
-              FLOPs savings.
-            </li>
-            <li>
-              <strong>Other generation techniques.</strong> Our setup uses autoregressive
-              next-token prediction throughout. Exploring other generation paradigms (e.g. masked
-              generation, diffusion-based decoding) in combination with adaptive recursion is a
-              natural next step.
-            </li>
-          </ul>
+          <p>
+            Several directions stand out for follow-up work. First, our conclusions should
+            be tested at <strong>larger scale and on more natural image datasets such as COCO</strong>. All current
+            experiments are based on CLEVR and relatively small models, so it remains open
+            whether the observed routing patterns, including the background-focused depth
+            allocation, would persist with larger parameter counts, higher-resolution
+            inputs, or natural image datasets.
+          </p>
+          
+          <p>
+            Second, future work should explore <strong>more sophisticated routing strategies</strong>. The
+            current token-choice router is simple and efficient, but its objective is still tied to next-token prediction. More sophisticated approaches, such
+            as reinforcement-learning or Q-learning-inspired routing objectives, could
+            explicitly optimize the trade-off between generation quality and computational
+            cost. In addition, a per-modality router variant remains an important ablation:
+            it would test whether RGB, depth, normals, and text benefit from distinct
+            routing policies, or whether a shared router is sufficient to capture
+            cross-modal differences.
+          </p>
+          
+          <p>
+            Finally, it would be valuable to study MoR with <strong>generation frameworks other
+            than autoregressive decoding</strong>. Autoregressive generation imposes a
+            sequential order on image tokens, which may be suboptimal for spatial data and
+            can introduce positional biases. Masked-token generation approaches such as
+            MaskGIT could provide a more natural image-generation setting, where tokens are
+            generated or refined in parallel. This would help determine whether adaptive
+            recursion is specifically useful for autoregressive visual generation, or
+            whether it can generalize to broader generative paradigms.
+          </p>
         </div>
       </div>
     </div>
@@ -1063,6 +1235,8 @@
             <li id="ref11">H. Yin et al., "A-ViT: Adaptive tokens for efficient vision transformer," <em>CVPR</em>, 2022.</li>
             <li id="ref12">Y. Luo et al., "&gamma;-MoD: Exploring mixture-of-depth adaptation for multimodal large language models," <em>arXiv:2410.13859</em>, 2024.</li>
             <li id="ref13">J. Johnson, B. Hariharan, L. van der Maaten, L. Fei-Fei, C. L. Zitnick, and R. Girshick, "CLEVR: A diagnostic dataset for compositional language and elementary visual reasoning," <em>CVPR</em>, 2017.</li>
+            <li id="ref14">A. Pannatier, E. Courdier, and F. Fleuret, "&sigma;-GPTs: A New Approach to Autoregressive Models," <em>arXiv:2404.09562</em>, 2024. <a href="https://arxiv.org/abs/2404.09562" target="_blank">[arXiv]</a></li>
+            <li id="ref15">Q. Yu, J. He, X. Deng, X. Shen, and L.-C. Chen, "Randomized Autoregressive Visual Generation," <em>arXiv:2411.00776</em>, 2024. <a href="https://arxiv.org/abs/2411.00776" target="_blank">[arXiv]</a></li>
           </ol>
         </div>
       </div>
@@ -1090,7 +1264,9 @@
             <strong>Mahlia Merville-Hipeau</strong> [TODO]
           </p>
           <p>
-            <strong>Romane Vorwald</strong> [TODO]
+            <strong>Romane Vorwald</strong> identified the changes required to train the
+            random-router MoR and vanilla LLaMA baselines, and carried out the training of the random-router
+            baseline used in our comparisons.
           </p>
           <p>
             All authors contributed to running experiments, evaluating performance, and writing the
