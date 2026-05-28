@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <!--TODO: THE METADATA OF THE WEBSITE CAN BE EDITED USING THE META TAGS BELOW -->
+  <!--THE METADATA OF THE WEBSITE CAN BE EDITED USING THE META TAGS BELOW -->
   <meta charset="utf-8">
   <meta name="description"
         content="Mixture-of-Recursions for Vision: adapting per-token adaptive recursion depth to image and multimodal generation on CLEVR.">
@@ -40,7 +40,7 @@
 
 <body>
 
-<!--TODO: THE HEADLINE OF THE WEBPAGE: TITLE AND AUTHORS -->
+<!--THE HEADLINE OF THE WEBPAGE: TITLE AND AUTHORS -->
 <section class="hero">
   <div class="hero-body">
     <div class="container is-max-desktop">
@@ -70,7 +70,7 @@
           </div>
 
           <!------------------------------------------------------------------------->
-          <!--TODO: THE LINKS RELATED TO THE PROJECT -->
+          <!--THE LINKS RELATED TO THE PROJECT -->
           <div class="column has-text-centered">
             <div class="publication-links">
               <!-- PDF Link.
@@ -122,7 +122,7 @@
 </section>
 <!------------------------------------------------------------------------->
 
-<!--TODO: TEASER -->
+<!--TEASER -->
 <section class="hero teaser">
   <div class="container is-max-desktop">
     <div class="hero-body">
@@ -170,7 +170,7 @@
 </script>
 <!------------------------------------------------------------------------->
 
-<!--TODO: ABSTRACT OF THE PROJECT -->
+<!--ABSTRACT OF THE PROJECT -->
 <section class="section">
   <div class="container is-max-desktop">
     <!-- Abstract. -->
@@ -179,15 +179,24 @@
         <h2 class="title is-3">Abstract</h2>
         <div class="content has-text-justified">
           <p>
-            [TODO]
+            Standard vision and multimodal Transformers typically apply the same computation to all tokens, despite the heterogeneous information content of
+            visual scenes and modalities. In this work, we investigate whether Mixture-of-Recursions (MoR), originally developed for language modeling, can be
+            adapted to image and multimodal generation. We tokenize RGB, depth, surface normals, captions, and scene descriptions into a shared discrete vocabulary
+            and train a LLaMA-based recursive decoder on CLEVR dataset. The model reuses a shared Transformer block across recursive steps, while a token-choice router assigns
+            each token an adaptive recursion depth. We compare this approach with a vanilla fixed-depth LLaMA baseline and a random-router MoR baseline, and further evaluate an $N_r{=}4$
+            recursion-depth ablation. Our results show that adaptive recursion provides substantial compute savings: in the multimodal setting, token-choice MoR with $N_r{=}3$ uses approximately
+            61% fewer training FLOPs than vanilla while remaining close in training loss. The learned router also produces interpretable, modality-dependent routing patterns.
+            However, the vanilla baseline remains stronger on most evaluated generation tasks.
+            Overall, our results support MoR as a promising efficiency and interpretability mechanism for visual generation, while showing that transferring its full performance gains from language to multimodal vision remains challenging.
           </p>
+          
         </div>
       </div>
     </div>
     <!--/ Abstract. -->
 
     <!------------------------------------------------------------------------->
-    <!--TODO: LIST OF ITEMS IN THE WEBSITE -->
+    <!--LIST OF ITEMS IN THE WEBSITE -->
     <div class="columns is-centered has-text-centered">
       <div class="column is-full-width">
         <h2 class="title is-3">Overview</h2>
@@ -275,7 +284,7 @@
             the same number of Transformer layers. This <em>uniform computation</em> prevents the model from adapting its computational effort to
             the heterogeneous information content of visual scenes. For example, a visually simple sky patch receives the
             same amount of processing as an object boundary.
-            Similarly, different modalities can carry very different amount of semantic information at the same spatial location.
+            Similarly, different modalities can carry very different amounts of semantic information at the same spatial location.
           </p>
           <p>
             Bae et al. address a related limitation in language modeling  with <strong>Mixture-of-Recursions (MoR)</strong> <a href="#ref5">[5]</a> by learning per-token recursion depth via lightweight routers: a shared
@@ -298,6 +307,9 @@
               relative to a fixed-depth baseline while reducing compute?
             </li>
           </ul>
+          <p>
+            To address this, we tokenize visual and textual modalities into a shared vocabulary and train a recursive decoder with learned token-level depth allocation.
+          </p>
 
           <h3 class="title is-4">Why is it important?</h3>
           <p>
@@ -328,7 +340,7 @@
 </section>
 <!------------------------------------------------------------------------->
 
-<!-----------------------------TODO: RELATED WORK-------------------------------->
+<!-----------------------------RELATED WORK-------------------------------->
 <section class="section">
   <div class="container is-max-desktop">
     <!-- Related Work. -->
@@ -429,7 +441,7 @@
                   <strong>Figure 1.</strong> Overview of our MoR-for-Vision architecture. Each modality
                   is tokenized by its own tokenizer and concatenated into a single sequence. A token-choice router assigns each token
                   a recursion depth, determining how many times it passes through the shared block. The shared
-                  recursive block is then applied up to $N_r{=}3$ times.
+                  recursive block is then applied up to $N_r{=}3$ times in the main configuration, and up to $N_r{=}4$ in the recursion-depth ablation.
                 </span>
               </font>
             </h5>
@@ -530,7 +542,7 @@
 
           <p>
             <strong>Milestone II, multimodal setting.</strong> Using the insights from Milestone I,
-            we extend the model to multimodal setting with RGB, depth, normals, and captions. The token-choice router and
+            we extend the model to a multimodal setting with RGB, depth, normals, and captions. The token-choice router and
             $\alpha$ value selected in Milestone I are carried over to the multimodal experiments. Our initial plan called for
             one dedicated router per modality, but Milestone I results led us to revise this. Therefore, we
             use a single shared router trained with random modality orderings, so that the router
@@ -693,7 +705,7 @@
             $N_r{=}3$.
           </p>
 
-          <h4 class="title is-5" style="margin-top:2rem;">Expert-choice collapse</h4>
+          <h3 class="title is-4" style="margin-top:2rem;">Expert-choice collapse</h3>
           <p>
             Although our proposal selected expert-choice routing, it converged in practice to a
             position-dependent allocation: tokens at early sequence positions received depth 3, and
@@ -742,9 +754,7 @@
             To evaluate reconstruction quality within a single modality, we condition the model on
             the first 25% of tokens from a given modality sequence and ask it to generate the
             remaining 75% autoregressively. This tests whether the model has learned a coherent
-            internal representation of that modality. We report mean squared error (MSE) between
-            the generated and ground-truth token sequences after decoding, comparing token-choice
-            MoR against the vanilla and random-router baselines.
+            internal representation of that modality.
           </p>
 
           <div class="columns is-centered" style="margin-top: 1.5rem;">
@@ -832,13 +842,15 @@
           <p>
             Although the shared multimodal vocabulary allows generation between any pair of modalities,
             we restrict our quantitative analysis to the most interpretable and semantically meaningful cross-modal tasks:
-            
+          </p>
+
             <ul>
               <li><strong>RGB &rarr; Caption</strong></li>
               <li><strong>Caption &rarr; RGB</strong></li>
               <li><strong>RGB &rarr; Scene description</strong></li>
             </ul>
             
+          <p>
             Other modality pairs are less informative in our setting
             because several visual modalities are represented through the same discrete tokenization framework. Therefore, evaluating generation between
             them would partly measure token-level reconstruction rather than meaningful cross-modal transfer. The selected tasks instead test complementary
@@ -847,14 +859,16 @@
             
           <p>
             Different output types call for different metrics:
+          </p>
+
             <ul>
               <li>For <strong>RGB → Caption generation</strong>, we report both <strong>CLIPScore</strong> and <strong>BLEU-4</strong> to capture different aspects of text quality.
               CLIPScore measures the semantic alignment between the generated caption and the input image. BLEU-4 provides a stricter n-gram overlap measure with the reference caption, allowing us to assess how closely the generated text matches
               the expected linguistic formulation.</li>
               <li>For <strong>Caption → RGB generation</strong>, we use <strong>Pixel-MSE</strong> and <strong>SSIM</strong> after decoding the generated visual tokens. Pixel-MSE measures low-level reconstruction error at the pixel level,
                 while SSIM captures perceptual similarity in terms of image structure, contrast, and luminance.</li>
+              <li>For <strong>RGB → Scene description generation</strong>, we evaluate object-level agreement using Jaccard, F1, precision, recall, position L2, and per-attribute accuracies.</li>
             </ul>
-          </p>
 
           <div class="table-container" style="margin-top: 1.5rem;">
             <table class="table is-bordered is-striped is-narrow is-hoverable is-fullwidth">
@@ -912,7 +926,7 @@
             $N_r{=}3$, but slightly reduces BLEU-4.
             In contrast, for Caption → RGB, the $N_r{=}3$ token-choice MoR model performs best on both Pixel-MSE and SSIM,
             suggesting that adaptive recursion is particularly beneficial for this language-to-image generation
-            direction. However, the $N_r{=}4$ variant perform worse than the main $N_r{=}3$ model, again suggesting that additional
+            direction. However, the $N_r{=}4$ variant performs worse than the main $N_r{=}3$ model, again suggesting that additional
             recursion depth does not automatically translate into better generation quality.
           </p>
 
@@ -1174,6 +1188,26 @@
             <strong>(C)</strong> Results for the random-router MoR baseline.
           </p>
 
+          <h3 class="title is-4" style="margin-top: 2.5rem;">Comparison with the Original MoR Results</h3>
+
+          <p>
+            The original MoR paper reports that, in language modeling, MoR with <strong>expert-choice routing</strong> improves
+            validation loss and few-shot accuracy compared with vanilla Transformers while using substantially fewer
+            parameters or training FLOPs. However, these results are not directly comparable to ours. In our vision setting, 
+            <strong>expert-choice routing collapsed to a position-dependent schedule</strong>, so we focused on token-choice routing instead.
+            This distinction is important because the original authors found token-choice routing to perform worse than
+            expert-choice routing in their language-modeling experiments.
+          </p>
+
+          <p>
+            With this caveat, our results partially reproduce the original motivation of MoR, but not the full performance
+            gains. As in the original paper, our token-choice MoR models reduce training compute substantially compared
+            with a vanilla fixed-depth baseline, and the learned router provides interpretable evidence of non-uniform
+            compute allocation. However, unlike the original expert-choice MoR results in language, our MoR models do
+            not consistently outperform vanilla LLaMA on generation quality metrics. This suggests that MoR transfers as an efficiency
+            and interpretability mechanism, but not yet as a direct quality-improving replacement for fixed-depth Transformers in visual generation.
+          </p>
+
         </div>
       </div>
     </div>
@@ -1210,18 +1244,17 @@
             token-choice MoR performs best. The $N_r{=}4$ ablation further shows that increasing the maximum recursion depth may improve some aspects of structured prediction,
             but does not consistently improve generation quality.
             Together, these results suggest that adaptive recursion can scale to multimodal generation and provide a strong compute-quality trade-off.
+            Overall, our work supports the main motivation of MoR: adaptive recursion can reduce compute and provide interpretable routing. However, it also shows that vision
+            and multimodal generation introduce additional challenges, preventing the same performance gains observed in the original MoR paper for language modeling.
           </p>
 
           <h3 class="title is-4">Limitations</h3>
           <ul>
             <li>
-              <strong>Generalization.</strong> The routing behavior we observe is specific to CLEVR,
-              a procedurally generated dataset with strong geometric regularity. It may not
-              generalize to natural images or larger-scale models.
-              <strong>Scale and domain.</strong> All results are conducted at the 135M-base scale on CLEVR, a
+              <strong>Scale and domain.</strong> All experiments are conducted at the 135M-base scale on CLEVR, a
               procedurally generated dataset with strong geometric regularity. It is therefore not clear
-              whether the routing patterns we observe would hold on natural images or at larger
-              scale. In particular, we do not yet know whether the same token-depth allocation strategy would be the same.
+              whether the observed routing patterns, including the background-focused depth allocation, would generalize to natural images, higher-resolution inputs
+              or larger models.
             </li>
             <li>
               <strong>Generation quality gap with vanilla LLaMA.</strong> Although
