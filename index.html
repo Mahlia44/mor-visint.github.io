@@ -756,14 +756,36 @@
           </p>
 
           <!-- ===================== CROSS-MODAL ===================== -->
-          <h3 class="title is-4" style="margin-top: 2.5rem;">Cross-Modal Generation</h3>
+          <h3 class="title is-4" style="margin-top: 2.5rem;">Cross-Modal Generation: Quantitative Analysis</h3>
           <p>
-            We condition the model on one full input modality and generate a target modality
-            autoregressively. Different output types call for different metrics. For dense visual
-            outputs (image-to-image), we use MSE on decoded token sequences. For structured
-            semantic outputs we use task-appropriate metrics: IoU for scene descriptions (measuring
-            object-level agreement), and CLIPScore for captions (measuring semantic alignment
-            between the generated text and the input image).
+            We condition the model on one full input modality and generate a target modality autoregressively.
+          </p>
+
+          <p>
+            Although the shared multimodal vocabulary allows generation between any pair of modalities,
+            we restrict our quantitative analysis to the most interpretable and semantically meaningful cross-modal tasks:
+            
+            <ul>
+              <li><strong>RGB &rarr; Caption</strong></li>
+              <li><strong>Caption &rarr; RGB</strong></li>
+              <li><strong>RGB &rarr; Scene description</strong></li>
+            </ul>
+            
+            Other modality pairs are less informative in our setting
+            because several visual modalities are represented through the same discrete tokenization framework. Therefore, evaluating generation between
+            them would partly measure token-level reconstruction rather than meaningful cross-modal transfer. The selected tasks instead test complementary
+            abilities: visual-to-language and language-to-image generations, and structured scene understanding from RGB input.
+          </p>
+            
+          <p>
+            Different output types call for different metrics:
+            <ul>
+              <li>For <strong>RGB → Caption generation</strong>, we report both <strong>CLIPScore</strong> and <strong>BLEU-4</strong> to capture different aspects of text quality.
+              CLIPScore measures the semantic alignment between the generated caption and the input image. BLEU-4 provides a stricter n-gram overlap measure with the reference caption, allowing us to assess how closely the generated text matches
+              the expected linguistic formulation.</li>
+              <li>For <strong>Caption → RGB generation</strong>, we use <strong>Pixel-MSE</strong> and <strong>SSIM</strong> after decoding the generated visual tokens. Pixel-MSE measures low-level reconstruction error at the pixel level,
+                while SSIM captures perceptual similarity in terms of image structure, contrast, and luminance.</li>
+            </ul>
           </p>
 
           <div class="table-container" style="margin-top: 1.5rem;">
@@ -1029,8 +1051,9 @@
           
           <p style="text-align:center; font-size:0.9em; margin-top:0.5rem;">
             <strong>Figure 3.</strong> Average recursion depth per output modality, broken down by
-            conditioning modality. The left panel shows the results for the token-choice MoR model,
-            while the right panel shows the random-router MoR baseline. Differences across bars indicate
+            conditioning modality. <strong>(A)</strong> Results for the token-choice MoR model with <em>N<sub>r</sub></em> = 3.
+            <strong>(B)</strong> Results for the token-choice MoR model with <em>N<sub>r</sub></em> = 4.
+            <strong>(C)</strong> Results for the random-router MoR baseline. Differences across bars indicate
             how the router allocates computation depending on both the generated modality and the
             conditioning modality.
           </p>
@@ -1055,9 +1078,10 @@
           
           <p style="text-align:center; font-size:0.9em; margin-top:0.5rem;">
             <strong>Figure 4.</strong> Distribution of recursion depths across tokens, broken down
-            by modality. Each bar shows the fraction of tokens routed to depth 1, 2, or 3 for that
-            modality. The left panel shows the depth distributions for the token-choice MoR model,
-            while the right panel shows the random-router MoR baseline.
+            by modality. Each bar shows the fraction of tokens routed to each recursion depth for a given modality. <strong>(A)</strong> Results for the token-choice MoR model with <em>N<sub>r</sub></em> = 3, with
+            depths 1-3.
+            <strong>(B)</strong> Results for the token-choice MoR model with <em>N<sub>r</sub></em> = 4, with depths 1-4.
+            <strong>(C)</strong> Results for the random-router MoR baseline.
           </p>
 
           <h4 class="title is-5" style="margin-top:2rem;">Expert-choice collapse</h4>
@@ -1111,7 +1135,7 @@
 </section>
 <!------------------------------------------------------------------------->
 
-<!-----------------------------TODO: CONCLUSION & LIMITATIONS-------------------------------->
+<!-----------------------------CONCLUSION & LIMITATIONS-------------------------------->
 <section class="section">
   <div class="container is-max-desktop">
     <!-- Conclusion and Limitations. -->
@@ -1154,17 +1178,14 @@
             </li>
             <li>
               <strong>Generation quality gap with vanilla LLaMA.</strong> Although
-              token-choice MoR provides a favorable compute-quality trade-off, the vanilla
+              token-choice MoR provides a good compute-quality trade-off, the vanilla
               fixed-depth LLaMA baseline still outperforms MoR on several generation
-              metrics, especially for RGB-to-caption generation and structured
-              scene-description recovery. This suggests that adaptive recursion reduces
-              compute but does not yet consistently match the predictive quality of the
-              fixed-depth model across all tasks.
+              metrics. The compute savings come at a cost in raw quality, at least at this scale and on this dataset.
             </li>
             <li>
-              <strong>Generation quality.</strong> Vanilla LLaMA outperforms MoR on several
-              generation metrics. The compute savings come at a cost in raw quality, at least at
-              this scale and on this dataset.
+              <strong>Limited cross-modal evaluation.</strong> Quantitative evaluation is restricted to RGB → Caption, Caption → RGB,
+              and RGB → Scene description. These tasks were selected because they are the most semantically interpretable in our setup, but
+              they do not cover all possible modality pairs.
             </li>
             <li>
               <strong>Limited multimodal training budget.</strong> The multimodal model was
@@ -1186,14 +1207,12 @@
           </p>
           
           <p>
-            Second, future work should explore <strong>more sophisticated routing strategies</strong>. The
-            current token-choice router is simple and efficient, but its objective is still tied to next-token prediction. More sophisticated approaches, such
+            Second, future work should explore <strong>more sophisticated routing strategies</strong>. The objective of
+            current token-choice router is tied to next-token prediction. More sophisticated approaches, such
             as reinforcement-learning or Q-learning-inspired routing objectives, could
-            explicitly optimize the trade-off between generation quality and computational
-            cost. In addition, a per-modality router variant remains an important ablation:
-            it would test whether RGB, depth, normals, and text benefit from distinct
-            routing policies, or whether a shared router is sufficient to capture
-            cross-modal differences.
+            explicitly optimize the trade-off between generation quality and computational cost. In addition, we could test a per-modality router variant.
+            This ablation would provide insights into whether RGB, depth, normals, and text benefit from distinct
+            routing policies, or whether a shared router is sufficient to capture cross-modal differences.
           </p>
           
           <p>
@@ -1202,9 +1221,7 @@
             sequential order on image tokens, which may be suboptimal for spatial data and
             can introduce positional biases. Masked-token generation approaches such as
             MaskGIT could provide a more natural image-generation setting, where tokens are
-            generated or refined in parallel. This would help determine whether adaptive
-            recursion is specifically useful for autoregressive visual generation, or
-            whether it can generalize to broader generative paradigms.
+            generated or refined in parallel.
           </p>
         </div>
       </div>
