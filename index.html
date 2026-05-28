@@ -66,7 +66,7 @@
           </div>
 
           <div class="is-size-6 publication-authors" style="margin-top: 0.5em;">
-            <span class="author-block"><sup>1</sup>EPFL &mdash; CS-503 Visual Intelligence, Spring 2026</span>
+            <span class="author-block"><sup>1</sup>EPFL, CS-503 Visual Intelligence, Spring 2026</span>
           </div>
 
           <!------------------------------------------------------------------------->
@@ -151,7 +151,7 @@
       <h2 class="subtitle has-text-centered" style="margin-top: 1rem;">
         We adapt <span class="dnerf">Mixture-of-Recursions</span> to vision: a single shared
         transformer block applied a variable number of times per token, learning <em>where</em>
-        to spend compute on an image &mdash; and across modalities.
+        to spend compute on an image, and across modalities.
       </h2>
     </div>
   </div>
@@ -419,7 +419,7 @@
             increase the effective computation depth without increasing the number of parameters proportionally.
           </p>
 
-          <div align="center" class="box">
+          <!-- <div align="center" class="box">
             <img src="./static/images/mor_figure.png"
                  alt="Architecture overview: per-modality tokenizers feed a shared recursive transformer block; routers decide whether each token continues to the next recursion depth or exits early."
                  style="width: 100%; max-width: 800px;">
@@ -433,7 +433,7 @@
                 </span>
               </font>
             </h5>
-          </div>
+          </div> -->
 
           <h3 class="title is-4">Routing Strategy: Why We Use Only Token-Choice</h3>
 
@@ -941,7 +941,7 @@
                   <td>Jaccard ($\uparrow$)</td>
                   <td><strong>0.830</strong></td>
                   <td>0.803</td>
-                  <td>&mdash;</td>
+                  <td>N/A</td>
                   <td>0.802</td>
                 </tr>
                 <tr>
@@ -1325,7 +1325,8 @@
             <strong>Hugues Sibille</strong> [TODO]
           </p>
           <p>
-            <strong>Mahlia Merville-Hipeau</strong> [TODO]
+            <strong>Mahlia Merville-Hipeau</strong> carried out the training of the vanilla LLaMA
+            baseline used in our comparisons, created and worked on the webage and the animations for it.
           </p>
           <p>
             <strong>Romane Vorwald</strong> identified the changes required to train the
