@@ -414,7 +414,7 @@
 
           <p>
             We build on a SmolLM-135M LLaMA-based <a href="#ref8">[8]</a> decoder-only transformer
-            with <strong>Middle-Cycle parameter sharing</strong> and $N_r{=}3$ recursion steps, following the MoR setup <a href="#ref5">[5]</a>.
+            with <strong>Middle-Cycle parameter sharing</strong>. Our main configuration uses $N_r{=}3$ recursion steps, following the original MoR setup <a href="#ref5">[5]</a>, and we additionally evaluate an $N_r{=}4$ variant as a recursion-depth ablation.
             Instead of using a different transformer block at each depth, the model reuses a shared recursive block $f_\theta$ several times. This allows the model to
             increase the effective computation depth without increasing the number of parameters proportionally.
           </p>
@@ -476,8 +476,8 @@
             At generation step $t$, all previous tokens in the prefix are used to predict the next token.
             During the first recursion pass, all prefix tokens enter the shared recursive block. During the second
             pass, only tokens assigned to depth 2 or 3 are processed again. During the third pass, only
-            tokens assigned to depth 3 are processed. Because we use $N_r{=}3$, there are at most three
-            recursive passes.
+            tokens assigned to depth 3 are processed. In the main model, $N_r{=}3$, so there are at most three recursive passes.
+            But in the $N_r{=}4$ ablation, tokens can be processed for up to four recursive passes.
           </p>
 
           <p>
@@ -527,6 +527,7 @@
             token-choice routing strategies, and tune the key hyperparameters (in particular the residual
             mixing weight $\alpha$) to select the final token-choice configuration before introducing multiple modalities.
           </p>
+
           <p>
             <strong>Milestone II, multimodal setting.</strong> Using the insights from Milestone I,
             we extend the model to multimodal setting with RGB, depth, normals, and captions. The token-choice router and
@@ -534,6 +535,15 @@
             one dedicated router per modality, but Milestone I results led us to revise this. Therefore, we
             use a single shared router trained with random modality orderings, so that the router
             sees all modality types in context and cross-modal routing patterns can be studied (RQ2).
+          </p>
+
+          <p>
+            <strong>Recursion-depth ablation.</strong> In addition to our main token-choice MoR model with
+            $N_r{=}3$, we also experimented with a variant using $N_r{=}4$. This ablation allows us to test
+            whether increasing the maximum number of recursive passes improves generation quality.
+            We keep $N_r{=}3$ as the main configuration because it follows the original MoR setup and provides
+            a direct comparison with the baselines, while the $N_r{=}4$ model is used to assess
+            the effect of allowing deeper adaptive computation.
           </p>
 
           <h3 class="title is-4">Baselines</h3>
@@ -589,25 +599,25 @@
               </thead>
               <tbody>
                 <tr>
-                  <td><strong>Vanilla</strong> (no recursion)</td>
+                  <td>Vanilla (no recursion)</td>
                   <td>242.2</td>
                   <td>$7.91 \times 10^{17}$</td>
                   <td><strong>3.29</strong></td>
                 </tr>
                 <tr>
-                  <td>Random router MoR</td>
+                  <td>Random router MoR ($N_r{=}3$)</td>
                   <td>178.5</td>
                   <td>$2.79 \times 10^{17}$</td>
                   <td>3.58</td>
                 </tr>
                 <tr>
-                  <td>Token-choice MoR (ours)</td>
+                  <td>Token-choice MoR ($N_r{=}3$, ours)</td>
                   <td>179.2</td>
                   <td>$3.05 \times 10^{17}$</td>
                   <td>3.62</td>
                 </tr>
                 <tr>
-                  <td>Expert-choice</td>
+                  <td>Expert-choice MoR ($N_r{=}3$)</td>
                   <td>194.4</td>
                   <td>$4.22 \times 10^{17}$</td>
                   <td>3.90</td>
@@ -616,7 +626,7 @@
             </table>
             <p style="font-size: 0.9em;">
               <strong>Table 1.</strong> Parameters, training FLOPs and final loss at 19,500 steps
-              (Milestone I, RGB only). Best result per row in bold. Token-choice MoR uses ~26% fewer training FLOPs than the
+              (Milestone I, RGB only). Best result per column in bold. Token-choice MoR uses ~26% fewer training FLOPs than the
               vanilla baseline while staying within 0.33 of its training loss.
             </p>
           </div>
@@ -640,36 +650,90 @@
               </thead>
               <tbody>
                 <tr>
-                  <td><strong>Vanilla</strong> (no recursion)</td>
+                  <td>Vanilla (no recursion)</td>
                   <td>242.2</td>
                   <td>$8.05 \times 10^{17}$</td>
                   <td><strong>2.09</strong></td>
                 </tr>
                 <tr>
-                  <td>Random router MoR</td>
+                  <td>Random router MoR ($N_r{=}3$)</td>
                   <td>178.5</td>
-                  <td>$3.07 \times 10^{17}$</td>
+                  <td><strong>$3.07 \times 10^{17}$</strong></td>
                   <td>2.27</td>
                 </tr>
                 <tr>
-                  <td>Token-choice MoR (ours)</td>
+                  <td>Token-choice MoR ($N_r{=}3$, ours)</td>
                   <td>179.2</td>
                   <td>$3.18 \times 10^{17}$</td>
                   <td>2.27</td>
+                </tr>
+                <tr>
+                  <td>Token-choice MoR ($N_r{=}4$)</td>
+                  <td><strong>172.1</strong></td>
+                  <td>$5.26 \times 10^{17}$</td>
+                  <td>2.17</td>
                 </tr>
               </tbody>
             </table>
             <p style="font-size: 0.9em;">
               <strong>Table 2.</strong> Parameters, training FLOPs and final loss at 5,000 steps
-              (Milestone II, multimodal training). Best result per row in bold. Token-choice MoR uses ~61% fewer training FLOPs than the
-              vanilla baseline while staying within 0.18 of its training loss.
+              (Milestone II, multimodal training). Best result per column in bold. Token-choice MoR with
+              $N_r{=}3$ uses ~61% fewer training FLOPs than the
+              vanilla baseline while staying within 0.18 of its training loss. The $N_r{=}4$ variant improves training loss but requires more compute.
             </p>
           </div>
 
           <p>
-            The token-choice MoR model remains close to the vanilla fixed-depth baseline in terms of training loss while requiring
-            substantially less training compute. This trade-off is especially notable in the multimodal setting: despite using approximately 61% fewer training FLOPs,
-            the token-choice model reaches a final loss only 0.18 higher than the vanilla model.
+            The token-choice MoR models remain close to the vanilla fixed-depth baseline in terms of training loss while requiring
+            substantially less training compute. This trade-off is especially notable in the multimodal setting: the main token-choice MoR model
+            with $N_r{=}3$ remains close to the vanilla fixed-depth baseline in terms of training loss (only 0.18 higher) while using
+            substantially less compute (approximately 61% fewer training FLOPs). Increasing the recursion budget to $N_r{=}4$ improves the
+            training loss from 2.27 to 2.17, suggesting that additional recursive depth can help optimization.
+            However, this comes at a higher computational cost, reducing the efficiency gain that motivates adaptive recursion relative to
+            $N_r{=}3$.
+          </p>
+
+          <h4 class="title is-5" style="margin-top:2rem;">Expert-choice collapse</h4>
+          <p>
+            Although our proposal selected expert-choice routing, it converged in practice to a
+            position-dependent allocation: tokens at early sequence positions received depth 3, and
+            later tokens progressively less, producing the fixed three-band pattern in Figure 2(b)
+            regardless of input content. The reason is structural: expert-choice forces each
+            recursion stage to retain a fixed top-$k$ fraction of tokens, and the cheapest way to
+            satisfy this budget constraint while minimizing loss is to adopt a content-independent
+            positional schedule. We therefore switched to token-choice routing.
+          </p>
+          <div class="columns is-centered" style="margin-top: 1rem;">
+            <div class="column is-half">
+              <div align="center" class="box">
+                <img src="./static/images/token-inference.png"
+                     alt="Per-token recursion depth heatmap, token-choice router."
+                     style="width: 100%;">
+                <h5 class="subtitle has-text-centered">
+                  <font size="-0.7"><span style="font-weight:normal">
+                    <strong>(a) Token-choice.</strong> Depth-2 in the background, depth-1 around
+                    objects, a sparse subset at depth-3.
+                  </span></font>
+                </h5>
+              </div>
+            </div>
+            <div class="column is-half">
+              <div align="center" class="box">
+                <img src="./static/images/expert-inference.png"
+                     alt="Per-token recursion depth heatmap, expert-choice router."
+                     style="width: 100%;">
+                <h5 class="subtitle has-text-centered">
+                  <font size="-0.7"><span style="font-weight:normal">
+                    <strong>(b) Expert-choice.</strong> A purely positional schedule (early tokens
+                    at depth-3, later at depth-1) regardless of image content.
+                  </span></font>
+                </h5>
+              </div>
+            </div>
+          </div>
+          <p style="text-align:center; font-size:0.9em; margin-top:0.5rem;">
+            <strong>Figure 2.</strong> Per-token recursion depth heatmaps at inference. Token-choice
+            produces a content-dependent allocation; expert-choice collapses to a positional artifact.
           </p>
 
           <!-- ===================== WITHIN-MODALITY ===================== -->
@@ -713,7 +777,7 @@
           </div>
           
           <p style="text-align:center; font-size:0.9em;">
-            <strong>Figure 2.</strong> RGB-only conditional generation at inference time
+            <strong>Figure 3.</strong> RGB-only conditional generation at inference time
             using 25% context and 75% autoregressive generation. Qualitative comparison
             across token-choice MoR, random-router MoR, and vanilla LLaMA baselines.
           </p>
@@ -728,31 +792,35 @@
               </thead>
               <tbody>
                 <tr>
-                  <td><strong>Vanilla</strong> (no recursion)</td>
+                  <td>Vanilla (no recursion)</td>
                   <td><strong>56.598 ± 36.032</strong></td>
                 </tr>
                 <tr>
-                  <td>Random router MoR</td>
+                  <td>Random router MoR ($N_r{=}3$)</td>
                   <td>77.094 ± 49.797</td>
                 </tr>
                 <tr>
-                  <td>Token-choice MoR (ours)</td>
+                  <td>Token-choice MoR ($N_r{=}3$, ours)</td>
                   <td>72.838 ± 49.325</td>
+                </tr>
+                <tr>
+                  <td>Token-choice MoR ($N_r{=}4$)</td>
+                  <td>83.699 ± 58.420</td>
                 </tr>
               </tbody>
             </table>
             <p style="font-size:0.9em;">
-              <strong>Table 3.</strong> Within-modality RGB reconstruction perplexity (25% context, 75% generated). Lower is better and best result per row in bold.
+              <strong>Table 3.</strong> Within-modality RGB reconstruction perplexity (25% context, 75% generated). Lower is better and the best result is in bold.
             </p>
           </div>
 
           <p>
             Perplexity (PPL) measures how uncertain the model is when predicting the next token. Lower perplexity means the model assigns higher probability to the
             correct continuation and therefore generates the RGB sequence more confidently.
-            In this RGB-only reconstruction setting, the vanilla fixed-depth model obtains the lowest perplexity, while token-choice MoR improves over the random-router
-            baseline but remains higher than vanilla. This suggests that learned routing is
-            beneficial compared with random recursion-depth assignment, although the
-            fixed-depth baseline still performs best.
+            In this RGB-only reconstruction setting, the vanilla fixed-depth model obtains the lowest perplexity. The $N_r{=}3$ token-choice MoR model improves over
+            the random-router baseline, indicating that learned routing is more effective than random
+            recursion-depth assignment. However, increasing the recursion budget to $N_r{=}4$ gives the highest PPL among the tested models. This
+            suggests that allowing deeper recursion is not sufficient to improve generation quality.
           </p>
 
           <!-- ===================== CROSS-MODAL ===================== -->
@@ -795,8 +863,9 @@
                   <th>Direction</th>
                   <th>Metric</th>
                   <th>Vanilla (no recursion)</th>
-                  <th>Random router MoR</th>
-                  <th>Token-Choice MoR (ours)</th>
+                  <th>Random router MoR ($N_r{=}3$)</th>
+                  <th>Token-Choice MoR ($N_r{=}3$, ours)</th>
+                  <th>Token-Choice MoR ($N_r{=}4$)</th>
                 </tr>
               </thead>
               <tbody>
@@ -806,12 +875,14 @@
                   <td><strong>34.122 ± 2.076</strong></td>
                   <td>34.093 ± 2.310</td>
                   <td>33.930 ± 2.232</td>
+                  <td>34.068 ± 2.145</td>
                 </tr>
                 <tr>
                   <td>BLEU-4 ($\uparrow$)</td>
                   <td><strong>0.432 ± 0.227</strong></td>
                   <td>0.379 ± 0.218</td>
                   <td>0.406 ± 0.226</td>
+                  <td>0.401 ± 0.219</td>
                 </tr>
                 <tr>
                   <td rowspan="2">Caption → RGB</td>
@@ -819,12 +890,14 @@
                   <td>695.751 ± 320.936</td>
                   <td>816.684 ± 420.484</td>
                   <td><strong>658.456 ± 288.196</strong></td>
+                  <td>709.690 ± 279.135</td>
                 </tr>
                 <tr>
                   <td>SSIM ($\uparrow$)</td>
                   <td>0.841 ± 0.065</td>
                   <td>0.833 ± 0.072</td>
                   <td><strong>0.844 ± 0.063</strong></td>
+                  <td>0.832 ± 0.057</td>
                 </tr>
               </tbody>
             </table>
@@ -832,6 +905,16 @@
               <strong>Table 4.</strong> Cross-modal generation metrics. Best result per row in bold.
             </p>
           </div>
+
+          <p>
+            In cross-modal generation, the vanilla baseline remains strongest for RGB → Caption generation, achieving the
+            best CLIPScore and BLEU-4. Token-choice MoR with $N_r{=}4$ slightly improves the CLIPScore compared with
+            $N_r{=}3$, but slightly reduces BLEU-4.
+            In contrast, for Caption → RGB, the $N_r{=}3$ token-choice MoR model performs best on both Pixel-MSE and SSIM,
+            suggesting that adaptive recursion is particularly beneficial for this language-to-image generation
+            direction. However, the $N_r{=}4$ variant perform worse than the main $N_r{=}3$ model, again suggesting that additional
+            recursion depth does not automatically translate into better generation quality.
+          </p>
 
           <h4 class="title is-5" style="margin-top: 2rem;">RGB → Scene description (object detection)</h4>
           <p>
@@ -918,6 +1001,14 @@
               material accuracy. Jaccard for MoR ($N_r{=}3$) was not reported. Best per row in bold.
             </p>
           </div>
+
+          <p>
+            For RGB → Scene description, vanilla LLaMA is the strongest model across all reported metrics. The $N_r{=}4$ MoR variant performs similarly to the random-router and
+            $N_r{=}3$ MoR models on most attributes, but does not improve F1, precision, recall, or material
+            accuracy. Its main advantage is a lower position L2 error compared with the other MoR variants,
+            suggesting better spatial localization, but this improvement is not sufficient to outperform the
+            vanilla baseline.
+          </p>
 
           <h3 class="title is-4">Modality-To-Modality Generation</h3>
 
@@ -1050,7 +1141,7 @@
           </div>
           
           <p style="text-align:center; font-size:0.9em; margin-top:0.5rem;">
-            <strong>Figure 3.</strong> Average recursion depth per output modality, broken down by
+            <strong>Figure 4.</strong> Average recursion depth per output modality, broken down by
             conditioning modality. <strong>(A)</strong> Results for the token-choice MoR model with <em>N<sub>r</sub></em> = 3.
             <strong>(B)</strong> Results for the token-choice MoR model with <em>N<sub>r</sub></em> = 4.
             <strong>(C)</strong> Results for the random-router MoR baseline. Differences across bars indicate
@@ -1060,8 +1151,7 @@
 
           <h4 class="title is-5" style="margin-top:2rem;">Depth distribution per modality</h4>
           <p>
-            To get a finer picture, we plot the full distribution of recursion depths (depth 1, 2,
-            3) for each modality. A flat distribution would suggest the router treats all tokens
+            To get a finer picture, we plot the full distribution of recursion depths for each modality. A flat distribution would suggest the router treats all tokens
             equally within that modality; a peaked one indicates that most tokens agree on a single
             depth. We compare these distributions across modalities to check whether RGB, depth,
             normals, and caption tokens are routed differently (RQ2).
@@ -1077,54 +1167,11 @@
           </div>
           
           <p style="text-align:center; font-size:0.9em; margin-top:0.5rem;">
-            <strong>Figure 4.</strong> Distribution of recursion depths across tokens, broken down
+            <strong>Figure 5.</strong> Distribution of recursion depths across tokens, broken down
             by modality. Each bar shows the fraction of tokens routed to each recursion depth for a given modality. <strong>(A)</strong> Results for the token-choice MoR model with <em>N<sub>r</sub></em> = 3, with
             depths 1-3.
             <strong>(B)</strong> Results for the token-choice MoR model with <em>N<sub>r</sub></em> = 4, with depths 1-4.
             <strong>(C)</strong> Results for the random-router MoR baseline.
-          </p>
-
-          <h4 class="title is-5" style="margin-top:2rem;">Expert-choice collapse</h4>
-          <p>
-            Although our proposal selected expert-choice routing, it converged in practice to a
-            position-dependent allocation: tokens at early sequence positions received depth 3, and
-            later tokens progressively less, producing the fixed three-band pattern in Figure 5(b)
-            regardless of input content. The reason is structural: expert-choice forces each
-            recursion stage to retain a fixed top-$k$ fraction of tokens, and the cheapest way to
-            satisfy this budget constraint while minimizing loss is to adopt a content-independent
-            positional schedule. We therefore switched to token-choice routing.
-          </p>
-          <div class="columns is-centered" style="margin-top: 1rem;">
-            <div class="column is-half">
-              <div align="center" class="box">
-                <img src="./static/images/token-inference.png"
-                     alt="Per-token recursion depth heatmap, token-choice router."
-                     style="width: 100%;">
-                <h5 class="subtitle has-text-centered">
-                  <font size="-0.7"><span style="font-weight:normal">
-                    <strong>(a) Token-choice.</strong> Depth-2 in the background, depth-1 around
-                    objects, a sparse subset at depth-3.
-                  </span></font>
-                </h5>
-              </div>
-            </div>
-            <div class="column is-half">
-              <div align="center" class="box">
-                <img src="./static/images/expert-inference.png"
-                     alt="Per-token recursion depth heatmap, expert-choice router."
-                     style="width: 100%;">
-                <h5 class="subtitle has-text-centered">
-                  <font size="-0.7"><span style="font-weight:normal">
-                    <strong>(b) Expert-choice.</strong> A purely positional schedule (early tokens
-                    at depth-3, later at depth-1) regardless of image content.
-                  </span></font>
-                </h5>
-              </div>
-            </div>
-          </div>
-          <p style="text-align:center; font-size:0.9em; margin-top:0.5rem;">
-            <strong>Figure 5.</strong> Per-token recursion depth heatmaps at inference. Token-choice
-            produces a content-dependent allocation; expert-choice collapses to a positional artifact.
           </p>
 
         </div>
@@ -1160,9 +1207,9 @@
             due to computational reasons, token-choice MoR remains
             competitive with the vanilla fixed-depth baseline while using approximately 61% fewer training FLOPs. Cross-modal generation
             results are mixed, but promising. The vanilla model remains stronger for most generation tasks, with only the caption-to-RGB task as an exception, where
-            token-choice MoR performs best. Together, these results suggest that adaptive
-            recursion can scale to multimodal generation and provide a strong compute-quality
-            trade-off.
+            token-choice MoR performs best. The $N_r{=}4$ ablation further shows that increasing the maximum recursion depth may improve some aspects of structured prediction,
+            but does not consistently improve generation quality.
+            Together, these results suggest that adaptive recursion can scale to multimodal generation and provide a strong compute-quality trade-off.
           </p>
 
           <h3 class="title is-4">Limitations</h3>
