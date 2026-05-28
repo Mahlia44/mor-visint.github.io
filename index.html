@@ -367,10 +367,9 @@
           <p>
             Visual modalities are discretized by the
             <strong>Cosmos DI-16&times;16</strong> tokenizer <a href="#ref7">[7]</a>, producing 256
-            tokens per $256{\times}256$ image, and text modalities are tokenized with GPT-2 BPE. All modalities are mapped into a single discrete token space, so training reduces to
-            standard next-token prediction. The resulting unified
-            vocabulary contains 242,271 tokens, with separate codebook slots for RGB,
-            depth, normals, and captions.
+            tokens per image, and text modalities are tokenized with GPT-2 BPE. All modalities are mapped into a single discrete token space, so training reduces to
+            standard next-token prediction. The resulting unified vocabulary contains 242,271 tokens, with separate codebook slots for RGB,
+            depth, normals, while the text modalities (captions and scene descriptions) share the same codebook slots.
           </p>
 
           <p>
@@ -411,18 +410,16 @@
 
           <p>
             <strong>Expert-choice routing</strong> selects, at each recursion depth, the top-$k$ tokens to
-            process further, enforcing a fixed computational budget per recursion depth. However, we found in
-            the unimodal RGB experiments that the cheapest way for the
-            model to satisfy this budget while minimizing loss is to converge to a position-dependent pattern,
-            routing early-sequence tokens deep and later tokens shallow, regardless of image content
-            (see §IV). We even tested whether this positional collapse could be mitigated by randomly shuffling visual tokens during autoregressive training while
+            process further, enforcing a fixed computational budget per recursion depth. However, we found in the unimodal RGB experiments 
+            that the expert-choice router converged to a position-dependent routing pattern: assigning early-sequence tokens deeper recursion steps
+            and later tokens to shallower ones, regardless of the image content (see §IV). We even tested whether this positional collapse could be mitigated by randomly shuffling visual tokens during autoregressive training while
             retaining their original positional embeddings, inspired by prior work on randomized or
-            order-agnostic autoregressive generation <a href="#ref14">[14]</a><a href="#ref15">[15]</a>. However, the resulting routing behavior remained qualitatively unchanged (see §IV). This made expert-choice unsuitable for studying content-dependent visual routing.
+            order-agnostic autoregressive generation <a href="#ref14">[14]</a><a href="#ref15">[15]</a>. However, the resulting routing behavior remained qualitatively unchanged (see §IV).
+            We therefore switched to token-choice router.
           </p>
 
           <p>
-            For this reason, our final model uses <strong>token-choice routing</strong>.
-            Instead of choosing a fixed number of tokens per recursion depth, each token
+            <strong>Token-choice routing</strong> instead of choosing a fixed number of tokens per recursion depth, each token
             independently receives a recursion-depth assignment from the start. This gives
             the model more flexibility to allocate computation based on the token itself,
             rather than on a global top-$k$ budget. In our experiments, token-choice routing
@@ -432,7 +429,7 @@
           <p>
             The router output at each
             recursion is mixed back into the residual stream with a scalar weight $\alpha$, which
-            controls how strongly the routing decision influences the representation. We found $\alpha{=}1.0$ to be critical: smaller values caused the
+            controls how strongly the routing decision influences the representation. We found the $\alpha$ parameter to be critical: smaller values (e.g 0.1, 0.5 ) caused the
             router to collapse to a single depth, while $\alpha{=}1.0$ encouraged
             differentiation between depth 1, depth 2, and depth 3 tokens (reported in §IV).
           </p>
@@ -440,12 +437,11 @@
           <h3 class="title is-4">Autoregressive Generation</h3>
 
           <p>
-            During autoregressive generation, the model predicts the output sequence one token at a time.
-            At generation step $t$, all previous tokens in the prefix are used to predict the next token.
-            During the first recursion pass, all prefix tokens enter the shared recursive block. During the second
-            pass, only tokens assigned to depth 2 or 3 are processed again. During the third pass, only
-            tokens assigned to depth 3 are processed. In the main model, $N_r{=}3$, so there are at most three recursive passes.
-            But in the $N_r{=}4$ ablation, tokens can be processed for up to four recursive passes.
+            During autoregressive generation, to predict the next token t each recursion step (t),
+            the shared recursive block receives as context all prefix tokens assigned to a recursion depth (\ge t).
+            For the case of three recursion steps, all prefix tokens are processed during the first pass through the shared recursive block.
+            During the second pass, only tokens assigned to depth 2 or 3 are processed again. During the final third pass, only tokens assigned to depth 3 are processed.
+
           </p>
 
           <p>
@@ -457,11 +453,7 @@
             image.
           </p>
 
-          <p>
-            Recursion-wise KV caching is used to make this generation process more efficient. Tokens assigned to
-            shallower recursion depths do not need to be recomputed at deeper recursion passes, and previously
-            generated tokens can be reused when predicting the next token.
-          </p>
+
 
           <div align="center" class="box" style="overflow: visible;">
             <div style="width: 100%; max-width: 800px; margin: 0 auto; aspect-ratio: 16 / 9;">
@@ -491,16 +483,12 @@
           <p>
             <strong>Milestone I, unimodal proof of concept.</strong> We first train MoR on RGB only,
             to verify that adaptive recursion transfers from language to vision at all. This stage
-            lets us test whether adaptive recursion transfers from language to vision, compare expert-choice and
-            token-choice routing strategies, and tune the key hyperparameters (in particular the residual
-            mixing weight $\alpha$) to select the final token-choice configuration before introducing multiple modalities.
+            lets us test whether adaptive recursion transfers from language to vision, familirize with the codebase, and compare the two different routing strategies (expert-choice vs.token-choice).
           </p>
 
           <p>
             <strong>Milestone II, multimodal setting.</strong> Using the insights from Milestone I,
-            we extend the model to a multimodal setting with RGB, depth, normals, and captions. The token-choice router and
-            $\alpha$ value selected in Milestone I are carried over to the multimodal experiments. Our initial plan called for
-            one dedicated router per modality, but Milestone I results led us to revise this. Therefore, we
+            we extend the model to a multimodal setting with RGB, depth, normals, captions and scene description . Our initial plan called for one dedicated router per modality, but Milestone I results led us to revise this. Therefore, we
             use a single shared router trained with random modality orderings, so that the router
             sees all modality types in context and cross-modal routing patterns can be studied (RQ2).
           </p>
@@ -601,9 +589,7 @@
 
           <p>
             Milestone II extends training to all
-            four modalities with random ordering, but only for 5,000 steps due to computational constraints. In practice, training the multimodal model for substantially longer would have required approximately
-            one full week on the Izar cluster, which was not feasible within the project
-            timeline. Training loss is standard next-token prediction, and FLOPs are total training compute.
+            five modalities with random ordering, but only for 5,000 steps due to computational constraints. In practice, training the multimodal model for substantially longer would have required approximately one full week on the Izar cluster, which was not feasible within the project timeline. Training loss is standard next-token prediction, and FLOPs are total training compute.
           </p>
 
           <div class="table-container" style="margin-bottom: 0.5rem;">
@@ -781,12 +767,9 @@
           </div>
 
           <p>
-            Perplexity (PPL) measures how uncertain the model is when predicting the next token. Lower perplexity means the model assigns higher probability to the
-            correct continuation and therefore generates the RGB sequence more confidently.
-            In this RGB-only reconstruction setting, the vanilla fixed-depth model obtains the lowest perplexity. The $N_r{=}3$ token-choice MoR model improves over
-            the random-router baseline, indicating that learned routing is more effective than random
-            recursion-depth assignment. However, increasing the recursion budget to $N_r{=}4$ gives the highest PPL among the tested models. This
-            suggests that allowing deeper recursion is not sufficient to improve generation quality.
+            Perplexity (PPL) measures how uncertain the model is when predicting the next token. Lower perplexity means the model assigns higher probability to the correct next tokens and therefore generates the RGB sequence more confidently.
+            In this RGB-only reconstruction setting, the vanilla fixed-depth model obtains the lowest perplexity. The $N_r{=}3$ token-choice MoR model improves over the random-router baseline, indicating that learned routing is more effective than random
+            recursion-depth assignment. However, increasing the recursion budget to $N_r{=}4$ gives the highest PPL among the tested models. This suggests that allowing deeper recursion is not sufficient to improve generation quality.
           </p>
 
           <!-- ===================== CROSS-MODAL ===================== -->
@@ -796,8 +779,8 @@
           </p>
 
           <p>
-            Although the shared multimodal vocabulary allows generation between any pair of modalities,
-            we restrict our quantitative analysis to the most interpretable and semantically meaningful cross-modal tasks:
+            In order to assess visual-to-language and language-to-image generation, as well as structured scene understanding from RGB inputs we restrict our quantitative evaluation to the following setting:
+
           </p>
 
             <ul>
@@ -806,12 +789,7 @@
               <li><strong>RGB &rarr; Scene description</strong></li>
             </ul>
             
-          <p>
-            Other modality pairs are less informative in our setting
-            because several visual modalities are represented through the same discrete tokenization framework. Therefore, evaluating generation between
-            them would partly measure token-level reconstruction rather than meaningful cross-modal transfer. The selected tasks instead test complementary
-            abilities: visual-to-language and language-to-image generations, and structured scene understanding from RGB input.
-          </p>
+      
             
           <p>
             Different output types call for different metrics:
@@ -823,7 +801,7 @@
               the expected linguistic formulation.</li>
               <li>For <strong>Caption → RGB generation</strong>, we use <strong>Pixel-MSE</strong> and <strong>SSIM</strong> after decoding the generated visual tokens. Pixel-MSE measures low-level reconstruction error at the pixel level,
                 while SSIM captures perceptual similarity in terms of image structure, contrast, and luminance.</li>
-              <li>For <strong>RGB → Scene description generation</strong>, we evaluate object-level agreement using F1, precision, recall, position L2, and per-attribute accuracies.</li>
+              <li>For <strong>RGB → scene description generation</strong>, we evaluate object-level agreement using the F1 score. An object in the generated scene description is considered a match to an object in the ground-truth scene description when their shape, color, and texture all align. For each matched pair, we then compute the L2 distance between the ground-truth position and the generated one.</li>
             </ul>
 
           <div class="table-container" style="margin-top: 1.5rem;">
@@ -877,13 +855,16 @@
           </div>
 
           <p>
-            In cross-modal generation, the vanilla baseline remains strongest for RGB → Caption generation, achieving the
-            best CLIPScore and BLEU-4. Token-choice MoR with $N_r{=}4$ slightly improves the CLIPScore compared with
-            $N_r{=}3$, but slightly reduces BLEU-4.
-            In contrast, for Caption → RGB, the $N_r{=}3$ token-choice MoR model performs best on both Pixel-MSE and SSIM,
-            suggesting that adaptive recursion is particularly beneficial for this language-to-image generation
-            direction. However, the $N_r{=}4$ variant performs worse than the main $N_r{=}3$ model, again suggesting that additional
-            recursion depth does not automatically translate into better generation quality.
+            For RGB → Caption generation, the four models obtain comparable CLIPScore and BLEU-4.
+            The differences are small relative to the per-sample standard deviation, so we treat the caption-side results as tied. For
+            Caption → RGB, the $N_r{=}3$ token-choice MoR model performs best on both Pixel-MSE and
+            SSIM. The most informative comparison is against the random-router baseline: token-choice
+            MoR reduces Pixel-MSE by approximately 20% (658 vs 817), suggesting that the learned
+            routing decisions, and not just the recursive architecture, contribute to generation
+            quality in this direction. Compared with the vanilla baseline, $N_r{=}3$ MoR remains
+            within noise while using approximately 61% fewer training FLOPs. The $N_r{=}4$ variant
+            performs worse than $N_r{=}3$ on both metrics, again suggesting that additional recursion
+            depth does not automatically translate into better generation quality.
           </p>
 
           <h4 class="title is-5" style="margin-top: 2rem;">RGB → Scene description (object detection)</h4>
@@ -966,11 +947,16 @@
           </div>
 
           <p>
-            For RGB → Scene description, vanilla LLaMA is the strongest model across all reported metrics. The $N_r{=}4$ MoR variant performs similarly to the random-router and
-            $N_r{=}3$ MoR models on most attributes, but does not improve F1, precision, recall, or material
-            accuracy. Its main advantage is a lower position L2 error compared with the other MoR variants,
-            suggesting better spatial localization, but this improvement is not sufficient to outperform the
-            vanilla baseline.
+            For RGB → Scene description, vanilla LLaMA leads on every reported metric, but the size
+            of the gap varies substantially across them. Shape, color, and material accuracies remain
+            within one to two percentage points across all models, indicating that the discrete
+            attribute vocabulary is well captured by every variant. The largest gap appears on
+            Position L2 (0.669 for vanilla against 1.045 for $N_r{=}3$ MoR), pointing to spatial
+            localization as the main weakness of adaptive recursion in this setting. The $N_r{=}4$
+            variant reduces Position L2 to 0.860, a clear improvement over $N_r{=}3$, while leaving
+            attribute accuracies essentially unchanged. This suggests that the additional recursion
+            depth is used to integrate global spatial structure rather than to refine local
+            token-level predictions.
           </p>
 
           <h3 class="title is-4">Modality-To-Modality Generation</h3>
@@ -1140,21 +1126,33 @@
           <h3 class="title is-4" style="margin-top: 2.5rem;">Comparison with the Original MoR Results</h3>
 
           <p>
-            The original MoR paper reports that, in language modeling, MoR with <strong>expert-choice routing</strong> improves
-            validation loss and few-shot accuracy compared with vanilla Transformers while using substantially fewer
-            parameters or training FLOPs. However, these results are not directly comparable to ours. In our vision setting, 
-            <strong>expert-choice routing collapsed to a position-dependent schedule</strong>, so we focused on token-choice routing instead.
-            This distinction is important because the original authors found token-choice routing to perform worse than
-            expert-choice routing in their language-modeling experiments.
+            The original MoR paper reports that, in language modeling, MoR with
+            <strong>expert-choice routing</strong> improves validation loss and few-shot accuracy
+            compared with vanilla Transformers while using substantially fewer parameters or training
+            FLOPs. However, these results are not directly comparable to ours. In our vision setting,
+            <strong>expert-choice routing collapsed to a position-dependent schedule</strong>, so we
+            focused on token-choice routing instead. This distinction matters because the original
+            authors found token-choice routing to perform worse than expert-choice in their
+            language-modeling experiments (40.0% vs 42.6% on their few-shot benchmark). On the
+            recursion-depth axis, our findings are consistent with theirs: the original paper adopts
+            $N_r{=}3$ as its main configuration across all scales, and our $N_r{=}3$ vs $N_r{=}4$
+            comparison similarly suggests that increasing the maximum recursion depth from 3 to 4
+            does not consistently improve generation quality.
           </p>
 
           <p>
-            With this caveat, our results partially reproduce the original motivation of MoR, but not the full performance
-            gains. As in the original paper, our token-choice MoR models reduce training compute substantially compared
-            with a vanilla fixed-depth baseline, and the learned router provides interpretable evidence of non-uniform
-            compute allocation. However, unlike the original expert-choice MoR results in language, our MoR models do
-            not consistently outperform vanilla LLaMA on generation quality metrics. This suggests that MoR transfers as an efficiency
-            and interpretability mechanism, but not yet as a direct quality-improving replacement for fixed-depth Transformers in visual generation.
+            Our results partially reproduce the original motivation of MoR, but not the full
+            performance gains. As in the original paper, our token-choice MoR models reduce training
+            compute substantially compared with a vanilla fixed-depth baseline, and the learned
+            router provides interpretable evidence of non-uniform compute allocation. We trained at
+            the 135M scale, the smallest scale tested in the original paper, at which language-domain
+            MoR already outperforms vanilla Transformers. Compute constraints prevented us from
+            training larger variants, so we cannot rule out that the gains reported at 360M to 1.7B
+            in language would also emerge at larger scales for vision. However, at the scale we
+            tested, our MoR models do not consistently outperform vanilla LLaMA on generation quality
+            metrics. This suggests that MoR transfers as an efficiency and interpretability
+            mechanism, but not yet as a direct quality-improving replacement for fixed-depth
+            Transformers in visual generation.
           </p>
 
         </div>
@@ -1301,10 +1299,10 @@
         <div class="content">
           <h6 class="title is-6">Individual Contributions</h6>
           <p>
-            <strong>Gianfranco Basile</strong> [TODO]
+            <strong>Gianfranco Basile</strong> [TODO] Dataloader  training
           </p>
           <p>
-            <strong>Hugues Sibille</strong> [TODO]
+            <strong>Hugues Sibille</strong> [TODO] inference
           </p>
           <p>
             <strong>Mahlia Merville-Hipeau</strong> carried out the training of the vanilla LLaMA
