@@ -148,11 +148,6 @@
           <p style="margin-top: 0.4rem; font-weight: 600;">Caption</p>
         </div>
       </div>
-      <h2 class="subtitle has-text-centered" style="margin-top: 1rem;">
-        We adapt <span class="dnerf">Mixture-of-Recursions</span> to vision: a single shared
-        transformer block applied a variable number of times per token, learning <em>where</em>
-        to spend compute on an image, and across modalities.
-      </h2>
     </div>
   </div>
 </section>
@@ -167,7 +162,7 @@
     });
     srcs.forEach(function (item) { item.el.src = item.src; });
   });
-</script>
+</script
 <!------------------------------------------------------------------------->
 
 <!--ABSTRACT OF THE PROJECT -->
@@ -179,15 +174,7 @@
         <h2 class="title is-3">Abstract</h2>
         <div class="content has-text-justified">
           <p>
-            Standard vision and multimodal Transformers typically apply the same computation to all tokens, despite the heterogeneous information content of
-            visual scenes and modalities. In this work, we investigate whether Mixture-of-Recursions (MoR), originally developed for language modeling, can be
-            adapted to image and multimodal generation. We tokenize RGB, depth, surface normals, captions, and scene descriptions into a shared discrete vocabulary
-            and train a LLaMA-based recursive decoder on CLEVR dataset. The model reuses a shared Transformer block across recursive steps, while a token-choice router assigns
-            each token an adaptive recursion depth. We compare this approach with a vanilla fixed-depth LLaMA baseline and a random-router MoR baseline, and further evaluate an $N_r{=}4$
-            recursion-depth ablation. Our results show that adaptive recursion provides substantial compute savings: in the multimodal setting, token-choice MoR with $N_r{=}3$ uses approximately
-            61% fewer training FLOPs than vanilla while remaining close in training loss. The learned router also produces interpretable, modality-dependent routing patterns.
-            However, the vanilla baseline remains stronger on most evaluated generation tasks.
-            Overall, our results support MoR as a promising efficiency and interpretability mechanism for visual generation, while showing that transferring its full performance gains from language to multimodal vision remains challenging.
+            Standard transformer architectures apply uniform computation to all tokens, regardless of their semantic complexity. Mixture-of-Recursions (MoR) addresses this limitation in language by dynamically assigning per-token recursion depth via lightweight routers, but its extension to vision remains largely unexplored. We propose to adapt MoR to multimodal image generation on the CLEVR dataset, investigating whether routers learn semantically meaningful compute allocation across image regions and modalities, and whether adaptive recursion can match generation quality while reducing compute. We show that with $N_r{=}3$ we match feed-forward vanilla transformer in multimodal generation (text-to-image and image-to-text), while using approximately 61% fewer training FLOPs. We additionally show that expert-choice routing, the strategy used in the original language-domain MoR, collapses to a position-dependent depth-allocation in vision, motivating our switch to token-choice. The latter assigns more depths to background tokens than object tokens, contradicting our initial hypothesis. Overall, our results support MoR as a promising efficiency and interpretability mechanism for visual generation, though its effectiveness on downstream applications and natural images remains an open question.
           </p>
           
         </div>
@@ -278,19 +265,10 @@
         <div class="content has-text-justified">
           <h3 class="title is-4">What is the problem?</h3>
           <p>
-            Multimodal vision models such as <strong>4M</strong> <a href="#ref1">[1,</a><a href="#ref2">2]</a>
-            and <strong>TerraMind</strong> <a href="#ref3">[3]</a>, as well as decoder-only approaches like
-            <strong>MaskGIT</strong> <a href="#ref4">[4]</a>, process all spatial tokens through
-            the same number of Transformer layers. This <em>uniform computation</em> prevents the model from adapting its computational effort to
-            the heterogeneous information content of visual scenes. For example, a visually simple sky patch receives the
-            same amount of processing as an object boundary.
-            Similarly, different modalities can carry very different amounts of semantic information at the same spatial location.
+            Multimodal vision models such as <strong>4M</strong> <a href="#ref1">[1,</a><a href="#ref2">2]</a> and <strong>TerraMind</strong> <a href="#ref3">[3]</a>, as well as decoder-only approaches like <strong>MaskGIT</strong> <a href="#ref4">[4]</a>, process all spatial tokens through the same number of Transformer layers. This <em>uniform computation</em> ignores a key asymmetry: different modalities can carry very different amounts of information densities at the same spatial location. For example, a  sky patch receives the same amount of compute as an object boundary.
           </p>
           <p>
-            Bae et al. address a related limitation in language modeling  with <strong>Mixture-of-Recursions (MoR)</strong> <a href="#ref5">[5]</a> by learning per-token recursion depth via lightweight routers: a shared
-            parameter block is applied a variable number of times depending on each token's
-            complexity. In this way, tokens can receive different amounts of computation depending on their estimated complexity. However, MoR was designed to generate text. In this project, we propose to adapt their approach to images and multimodal generation, which
-            leads to the following research questions:
+             <strong>Mixture-of-Recursions (MoR)</strong> <a href="#ref5">[5]</a> addresses this in language by learning per-token recursion depth via lightweight routers: a shared parameter block is applied a variable number of times depending on each token. We propose to extend MoR to vision and multimodal image generation, which leads to the following research questions: 
           </p>
           <ul>
             <li>
@@ -307,7 +285,7 @@
               relative to a fixed-depth baseline while reducing compute?
             </li>
           </ul>
-          <p>
+          <p>  
             To address this, we tokenize visual and textual modalities into a shared vocabulary and train a recursive decoder with learned token-level depth allocation.
           </p>
 
@@ -315,22 +293,13 @@
           <p>
             <strong>Efficiency.</strong> In the original MoR paper, adaptive recursion achieves
             lower validation loss with ~50% fewer parameters than vanilla transformers under equal
-            training compute <a href="#ref5">[5]</a>. Extending this idea to vision is particularly
-            relevant because images are represented as many spatial tokens, making computation and activation memory scale
-            quickly with sequence length. Adaptive recursion could therefore reduce training FLOPs and
-            memory usage by allocating deeper processing only to tokens that need it.
+            training compute <a href="#ref5">[5]</a>. Extending this to vision, where token sequences are long, could yield significant savings in training time and memory.
           </p>
           <p>
-            <strong>Interpretability.</strong> Routing patterns provide a direct lens into how the
-            model allocates computation across the input. By visualizing which image patches or modalities are assigned
-            deeper recursion, we can inspect the model’s internal compute-allocation strategy, which is not directly accessible in standard Transformer architectures.
-            This is particularly relevant for vision, where adaptive routing can reveal whether the model prioritizes semantically rich or visually salient regions,
-            similarly to selective processing mechanisms in biological vision <a href="#ref6">[6]</a>.
+            <strong>Interpretability.</strong> Routing patterns provide a direct lens into how the model allocates computation. Visualizing which image patches or modalities receive deeper recursion offers insights unavailable in standard architectures, and mirrors biological vision's selective allocation to salient regions <a href="#ref6">[6]</a>.
           </p>
           <p>
-            <strong>Generalization to new domains.</strong> MoR was originally introduced for language
-            modeling, where adaptive recursion is applied to text tokens. However, whether this form of token-level adaptive computation can transfer to non-text domains remains largely unexplored. Our work
-            addresses this gap by investigating its application to visual and multimodal generation.
+            <strong>Generalization to new domains.</strong> MoR was introduced in language modeling, and its extension to non-text domains remains largely unexplored. Our work directly tests whether adaptive token-level computation transfers to visual and multimodal generation.
           </p>
         </div>
       </div>
@@ -350,32 +319,22 @@
         <div class="content has-text-justified">
           <p>
             The <strong>Universal Transformer</strong> <a href="#ref9">[9]</a> introduced recursive
-            parameter sharing with per-position adaptive halting, showing that different sequence
-            positions can benefit from different effective depths.
+            parameter sharing with per-position adaptive halting.
             <strong>Mixture-of-Depths (MoD)</strong> <a href="#ref10">[10]</a> later proposed
             top-$k$ routing to skip tokens at individual layers, matching baseline quality with up
-            to 50% fewer FLOPs, but without parameter sharing across layers, so model size still
-            grows with depth.
-            <strong>Mixture-of-Recursions (MoR)</strong> <a href="#ref5">[5]</a> unifies both ideas
-            by applying lightweight per-token routers to a shared recursive block, establishing a
-            new Pareto frontier across 135M to 1.7B parameter scales. All MoR experiments are
-            conducted on language only, and extending this framework to vision is explicitly listed
-            as an open direction by the authors.
-          </p>
-          <p>
+            to 50% fewer FLOPs, but without parameter sharing across layers.
+            <strong>MoR</strong> <a href="#ref5">[5]</a> unifies both ideas by applying lightweight
+            per-token routers to a shared recursive block, establishing a new Pareto frontier
+            across 135M to 1.7B parameter scales. All MoR experiments are conducted on language
+            only.
             In vision, <strong>A-ViT</strong> <a href="#ref11">[11]</a> applies per-token adaptive
-            halting to patch embeddings, but the study is restricted to unimodal classification and
-            does not involve parameter-shared recursion.
+            halting to patch embeddings for unimodal classification.
             <strong>$\gamma$-MoD</strong> <a href="#ref12">[12]</a> extends token skipping to
-            multimodal LLMs but relies on unique layers and does not study cross-modal routing
-            patterns. On the generative side, our backbone is informed by any-to-any multimodal
-            generators such as <strong>4M</strong> <a href="#ref1">[1,</a><a href="#ref2">2]</a> and
-            <strong>TerraMind</strong> <a href="#ref3">[3]</a>, which tokenize heterogeneous
-            modalities into a unified discrete vocabulary and train a single transformer to predict
-            across them. We adopt the same recipe, using the Cosmos DI-16x16 tokenizer
-            <a href="#ref7">[7]</a> for visual modalities and GPT-2 for text, but replace the
-            fixed-depth decoder with a recursive one.
-          </p>
+            multimodal LLMs but relies on unique layers and does not study cross-modal routing.
+            On the tokenization side, <strong>4M</strong> <a href="#ref1">[1,</a><a href="#ref2">2]</a>
+            and the <strong>Cosmos tokenizer</strong> <a href="#ref7">[7]</a> provide the discrete
+            multimodal vocabulary we build on, yet all these systems apply uniform computation to
+            every token.
           <p>
             <em>To our knowledge, no prior work combines MoR's recursive adaptive-depth framework
             with discrete multimodal vision tokens or studies cross-modal routing
@@ -399,12 +358,9 @@
         <div class="content has-text-justified">
           <h3 class="title is-4">Overview</h3>
           <p>
-            This section describes the methodological pipeline used in our MoR-for-Vision framework. We first introduce how
-            visual and textual modalities are converted into a shared discrete token representation. We then describe the recursive
-            decoder architecture and justify our choice of token-choice routing, based on
-            the limitations observed with expert-choice routing. Finally, we explain how the model performs autoregressive generation and present the experimental
-            protocol and baselines used to evaluate the contribution of learned adaptive
-            recursion.
+            This section describes the methodological pipeline used in our MoR-for-Vision framework. We first introduce how visual and textual modalities are converted into a shared discrete token space. 
+            We then describe the recursive decoder architecture and justify our choice of token-choice routing, based on the limitations observed with expert-choice routing.
+            Finally, we describe autoregressive generation and present the experimental protocol and baselines used to evaluate the contribution of learned adaptive recursion.
           </p>
 
           <h3 class="title is-4">Multimodal Tokenization</h3>
@@ -638,7 +594,7 @@
             </table>
             <p style="font-size: 0.9em;">
               <strong>Table 1.</strong> Parameters, training FLOPs and final loss at 19,500 steps
-              (Milestone I, RGB only). Best result per column in bold. Token-choice MoR uses ~26% fewer training FLOPs than the
+              (Milestone I, RGB only). Best result per column in bold. Token-choice MoR uses ~61% fewer training FLOPs than the
               vanilla baseline while staying within 0.33 of its training loss.
             </p>
           </div>
@@ -867,7 +823,7 @@
               the expected linguistic formulation.</li>
               <li>For <strong>Caption → RGB generation</strong>, we use <strong>Pixel-MSE</strong> and <strong>SSIM</strong> after decoding the generated visual tokens. Pixel-MSE measures low-level reconstruction error at the pixel level,
                 while SSIM captures perceptual similarity in terms of image structure, contrast, and luminance.</li>
-              <li>For <strong>RGB → Scene description generation</strong>, we evaluate object-level agreement using Jaccard, F1, precision, recall, position L2, and per-attribute accuracies.</li>
+              <li>For <strong>RGB → Scene description generation</strong>, we evaluate object-level agreement using F1, precision, recall, position L2, and per-attribute accuracies.</li>
             </ul>
 
           <div class="table-container" style="margin-top: 1.5rem;">
@@ -935,7 +891,7 @@
             We also evaluate how well the model recovers structured scene descriptions from RGB
             input. Predicted descriptions are parsed into object sets and matched to ground-truth
             objects via Hungarian matching with strict attribute equality (shape, color, and
-            material must all match). This gives a Jaccard score (set IoU), F1, and positional
+            material must all match). This gives F1 score, and positional
             accuracy, as well as per-attribute classification accuracy.
           </p>
 
@@ -951,13 +907,6 @@
                 </tr>
               </thead>
               <tbody>
-                <tr>
-                  <td>Jaccard ($\uparrow$)</td>
-                  <td><strong>0.830</strong></td>
-                  <td>0.803</td>
-                  <td>N/A</td>
-                  <td>0.802</td>
-                </tr>
                 <tr>
                   <td>F1 ($\uparrow$)</td>
                   <td><strong>0.893</strong></td>
@@ -1012,7 +961,7 @@
             <p style="font-size:0.9em;">
               <strong>Table 5.</strong> RGB → scene description: object detection metrics on 500
               samples. Vanilla leads across all metrics; MoR ($N_r{=}3$) is closest on F1 and
-              material accuracy. Jaccard for MoR ($N_r{=}3$) was not reported. Best per row in bold.
+              material accuracy. Best per row in bold.
             </p>
           </div>
 
